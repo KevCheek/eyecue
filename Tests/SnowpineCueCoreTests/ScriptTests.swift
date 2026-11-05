@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import EyeCueCore
+@testable import SnowpineCueCore
 
 @Test func normalizesCasePunctuationAndNumbers() {
     #expect(Normalizer.key("Ten,") == "10")

@@ -1,9 +1,17 @@
 import AppKit
-import EyeCueCore
+import SnowpineCueCore
+
+BrandFonts.register()
 
 if let flag = CommandLine.arguments.firstIndex(of: "--smoke-test") {
     let folder = CommandLine.arguments.indices.contains(flag + 1) ? CommandLine.arguments[flag + 1] : FileManager.default.currentDirectoryPath
     let code = MainActor.assumeIsolated { SmokeTest.run(outputDirectory: folder) }
+    exit(code)
+}
+
+if let flag = CommandLine.arguments.firstIndex(of: "--render-frames") {
+    let folder = CommandLine.arguments.indices.contains(flag + 1) ? CommandLine.arguments[flag + 1] : "frames"
+    let code = MainActor.assumeIsolated { DocsRenderer.runFrames(outputDirectory: folder) }
     exit(code)
 }
 
@@ -13,7 +21,7 @@ if let flag = CommandLine.arguments.firstIndex(of: "--render-docs") {
     exit(code)
 }
 
-// `EyeCue --check-script <file>` shows how a script file will be read, without opening the app.
+// `SnowpineCue --check-script <file>` shows how a script file will be read, without opening the app.
 if let flag = CommandLine.arguments.firstIndex(of: "--check-script"), CommandLine.arguments.indices.contains(flag + 1) {
     let url = URL(fileURLWithPath: CommandLine.arguments[flag + 1])
     do {

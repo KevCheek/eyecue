@@ -11,7 +11,7 @@ jobs:
   test:
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
       - name: Toolchain
@@ -21,4 +21,4 @@ jobs:
       - name: Build the signed app bundle
         run: scripts/build-app.sh
       - name: Launch check (sandboxed app starts, loads the welcome script, quits)
-        run: build/EyeCue.app/Contents/MacOS/EyeCue --launch-check
+        run: '"build/Snowpine Cue.app/Contents/MacOS/SnowpineCue" --launch-check'

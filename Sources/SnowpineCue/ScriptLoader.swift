@@ -1,5 +1,5 @@
 import AppKit
-import EyeCueCore
+import SnowpineCueCore
 
 /// Reads a script file into a ScriptDocument.
 enum ScriptLoader {
@@ -9,7 +9,7 @@ enum ScriptLoader {
         case tooLong
         var errorDescription: String? {
             switch self {
-            case .empty: return "That file has no text EyeCue can read."
+            case .empty: return "That file has no text Snowpine Cue can read."
             case .tooLarge: return "That file is over 20 MB, which is far more than a script needs."
             case .tooLong: return "That script is over \(ScriptLoader.maxCharacters / 1000),000 characters, far more than a talk needs. Split it into shorter files."
             }
@@ -64,10 +64,10 @@ enum ScriptLoader {
 
 enum WelcomeScript {
     static let document = ScriptDocument(title: "Welcome", sections: [
-        .init(heading: "Welcome to EyeCue", paragraphs: [
+        .init(heading: "Welcome to Snowpine Cue", paragraphs: [
             "This strip sits right under your camera, so you can read your script and still look at the people you are talking to.",
-            "Press Control Option P to start, or click the strip. With Follow My Voice on, EyeCue listens on this Mac and moves along as you speak. Nothing you say leaves your Mac.",
-            "To open a script, change settings or quit, click the EyeCue icon in the menu bar, a small notch with three lines under it. You can also right-click this strip for the same menu.",
+            "Press Control Option P to start, or click the strip. With Follow My Voice on, Snowpine Cue listens on this Mac and moves along as you speak. Nothing you say leaves your Mac.",
+            "To open a script, change settings or quit, click the Snowpine Cue icon in the menu bar, a small notch with three lines under it. You can also right-click this strip for the same menu.",
             "Control Option Down and Up move a line, Control Option R goes back to the start, and Control Option H hides the strip.",
             "The strip is hidden from screen sharing. Do one quick test share before a big call.",
         ]),

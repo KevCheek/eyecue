@@ -47,11 +47,11 @@ final class Settings: ObservableObject {
     var lineHeight: CGFloat { ceil(CGFloat(fontSize) * 1.38) }
 
     var bodyFont: NSFont {
-        NSFont(name: "AvenirNext-Medium", size: CGFloat(fontSize)) ?? .systemFont(ofSize: CGFloat(fontSize), weight: .medium)
+        NSFont(name: BrandFonts.bodyName, size: CGFloat(fontSize)) ?? .systemFont(ofSize: CGFloat(fontSize), weight: .medium)
     }
 
     var headingFont: NSFont {
         let size = max(11, CGFloat(fontSize) * 0.6)
-        return NSFont(name: "AvenirNext-DemiBold", size: size) ?? .systemFont(ofSize: size, weight: .semibold)
+        return NSFont(name: BrandFonts.headingName, size: size) ?? .systemFont(ofSize: size, weight: .semibold)
     }
 }

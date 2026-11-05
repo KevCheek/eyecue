@@ -1,22 +1,24 @@
 #!/bin/bash
-# Builds build/EyeCue.app: a sandboxed, ad-hoc signed menu bar app.
+# Builds build/Snowpine Cue.app: a sandboxed, ad-hoc signed menu bar app.
 #   scripts/build-app.sh            build only
 #   scripts/build-app.sh --install  build, then move it to ~/Applications
 # BUNDLE_ID and VERSION can be overridden from the environment.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-BUNDLE_ID="${BUNDLE_ID:-local.eyecue.EyeCue}"
-VERSION="${VERSION:-0.1.0}"
+BUNDLE_ID="${BUNDLE_ID:-com.snowpinecode.cue}"
+VERSION="${VERSION:-0.2.0}"
 BUILD_NUMBER="${BUILD_NUMBER:-$(date +%Y%m%d%H%M)}"
 
 swift build -c release
-BIN="$(swift build -c release --show-bin-path)/EyeCue"
+BIN="$(swift build -c release --show-bin-path)/SnowpineCue"
 
-APP=build/EyeCue.app
+APP="build/Snowpine Cue.app"
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
-cp "$BIN" "$APP/Contents/MacOS/EyeCue"
+cp "$BIN" "$APP/Contents/MacOS/SnowpineCue"
+# The brand fonts (SIL Open Font License) travel with the app.
+cp -R Resources/Fonts "$APP/Contents/Resources/Fonts"
 sed -e "s/__BUNDLE_ID__/$BUNDLE_ID/" -e "s/__VERSION__/$VERSION/" -e "s/__BUILD__/$BUILD_NUMBER/" \
     Resources/Info.plist > "$APP/Contents/Info.plist"
 # App icon: Resources/AppIcon.png (1024 x 1024) becomes AppIcon.icns.
@@ -30,7 +32,7 @@ iconutil -c icns "$ICONSET" -o "$APP/Contents/Resources/AppIcon.icns"
 
 # Ad-hoc signature with the hardened runtime and the sandbox entitlements.
 # To share a download that opens without warnings, sign with a Developer ID and notarize instead.
-codesign --force --options runtime --entitlements Resources/EyeCue.entitlements --sign - "$APP"
+codesign --force --options runtime --entitlements Resources/SnowpineCue.entitlements --sign - "$APP"
 codesign --verify --strict "$APP"
 
 # Check the entitlements actually signed into the app: sandbox on, no network.
@@ -45,8 +47,8 @@ echo "Built $APP ($VERSION, $BUNDLE_ID)"
 
 if [ "${1:-}" = "--install" ]; then
     mkdir -p "$HOME/Applications"
-    rm -rf "$HOME/Applications/EyeCue.app"
-    # Move rather than copy, so Spotlight finds one EyeCue, not a second one in build/.
+    rm -rf "$HOME/Applications/Snowpine Cue.app"
+    # Move rather than copy, so Spotlight finds one Snowpine Cue, not a second one in build/.
     mv "$APP" "$HOME/Applications/"
-    echo "Installed ~/Applications/EyeCue.app"
+    echo "Installed ~/Applications/Snowpine Cue.app"
 fi

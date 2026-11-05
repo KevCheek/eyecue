@@ -5,15 +5,15 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleExecutable</key>
-	<string>EyeCue</string>
+	<string>SnowpineCue</string>
 	<key>CFBundleIdentifier</key>
 	<string>__BUNDLE_ID__</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>EyeCue</string>
+	<string>Snowpine Cue</string>
 	<key>CFBundleDisplayName</key>
-	<string>EyeCue</string>
+	<string>Snowpine Cue</string>
 	<key>CFBundleIconFile</key>
 	<string>AppIcon</string>
 	<key>CFBundlePackageType</key>
@@ -28,11 +28,13 @@
 	<true/>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.productivity</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright 2026 Snowpine Code LLC. MIT License.</string>
 	<key>NSHighResolutionCapable</key>
 	<true/>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>EyeCue listens while the prompter is running so the script can follow your voice. Audio is processed on this Mac and is never recorded or sent anywhere.</string>
+	<string>Snowpine Cue listens while the prompter is running so the script can follow your voice. Audio is processed on this Mac and is never recorded or sent anywhere.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>EyeCue uses on-device speech recognition to keep your place in the script. Nothing you say leaves this Mac.</string>
+	<string>Snowpine Cue uses on-device speech recognition to keep your place in the script. Nothing you say leaves this Mac.</string>
 </dict>
 </plist>

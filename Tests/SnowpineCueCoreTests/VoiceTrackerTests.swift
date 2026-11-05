@@ -1,5 +1,5 @@
 import Testing
-@testable import EyeCueCore
+@testable import SnowpineCueCore
 
 private func keys(_ script: String) -> [String] { Normalizer.keys(in: script) }
 

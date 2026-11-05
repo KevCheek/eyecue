@@ -1,5 +1,5 @@
 import AppKit
-import EyeCueCore
+import SnowpineCueCore
 
 /// The script, where the speaker is in it, and whether the prompter is moving.
 final class PrompterModel: ObservableObject {

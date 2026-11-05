@@ -21,7 +21,7 @@ enum MenuBarIcon {
             return true
         }
         image.isTemplate = true
-        image.accessibilityDescription = "EyeCue"
+        image.accessibilityDescription = "Snowpine Cue"
         return image
     }
 }

@@ -1,5 +1,5 @@
 import Testing
-@testable import EyeCueCore
+@testable import SnowpineCueCore
 
 @Test func pausingWhileThePermissionPromptIsUpKeepsTheMicOff() {
     var life = ListenLifecycle()

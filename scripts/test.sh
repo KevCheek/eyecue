@@ -14,5 +14,5 @@ fi
 swift test "${EXTRA[@]}"
 scripts/check-no-network.sh
 swift build
-OUT="${TMPDIR:-/tmp}/eyecue-smoke"
-"$(swift build --show-bin-path)/EyeCue" --smoke-test "$OUT"
+OUT="${TMPDIR:-/tmp}/snowpine-cue-smoke"
+"$(swift build --show-bin-path)/SnowpineCue" --smoke-test "$OUT"

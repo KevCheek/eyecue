@@ -1,5 +1,5 @@
 import AVFoundation
-import EyeCueCore
+import SnowpineCueCore
 import Foundation
 import Speech
 
@@ -63,12 +63,12 @@ final class SpeechFollower {
         SFSpeechRecognizer.requestAuthorization { status in
             DispatchQueue.main.async {
                 guard status == .authorized else {
-                    done(false, "Speech recognition is off for EyeCue. Turn it on in System Settings > Privacy & Security > Speech Recognition, then press Start again.")
+                    done(false, "Speech recognition is off for Snowpine Cue. Turn it on in System Settings > Privacy & Security > Speech Recognition, then press Start again.")
                     return
                 }
                 AVCaptureDevice.requestAccess(for: .audio) { granted in
                     DispatchQueue.main.async {
-                        done(granted, "The microphone is off for EyeCue. Turn it on in System Settings > Privacy & Security > Microphone, then press Start again.")
+                        done(granted, "The microphone is off for Snowpine Cue. Turn it on in System Settings > Privacy & Security > Microphone, then press Start again.")
                     }
                 }
             }
@@ -95,7 +95,7 @@ final class SpeechFollower {
     private func begin(token: Int) {
         let recognizer = SFSpeechRecognizer(locale: Locale.current) ?? SFSpeechRecognizer(locale: Locale(identifier: "en-US"))
         guard let recognizer, recognizer.supportsOnDeviceRecognition else {
-            fail("This Mac can't recognize speech on-device for your language yet, and EyeCue never sends audio off the Mac. Turn on Dictation in System Settings > Keyboard so macOS downloads the speech model, or turn off Follow My Voice to scroll at a set speed.")
+            fail("This Mac can't recognize speech on-device for your language yet, and Snowpine Cue never sends audio off the Mac. Turn on Dictation in System Settings > Keyboard so macOS downloads the speech model, or turn off Follow My Voice to scroll at a set speed.")
             return
         }
         self.recognizer = recognizer
@@ -161,7 +161,7 @@ final class SpeechFollower {
                 let giveUp = self.failures.taskEnded(after: Date().timeIntervalSince(startedAt),
                                                      failed: failed, heardSomething: heardSomething)
                 if giveUp {
-                    self.fail("Speech recognition keeps stopping, so EyeCue turned the microphone off. Press Start to try again, or turn off Follow My Voice to scroll at a set speed.")
+                    self.fail("Speech recognition keeps stopping, so Snowpine Cue turned the microphone off. Press Start to try again, or turn off Follow My Voice to scroll at a set speed.")
                 } else {
                     self.restartTask(token: token)
                 }

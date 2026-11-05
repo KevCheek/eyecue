@@ -9,7 +9,7 @@ enum HotKeys {
     private static var nextID: UInt32 = 1
     private static var installed = false
 
-    /// Control + Option, the modifier pair every EyeCue shortcut uses.
+    /// Control + Option, the modifier pair every Snowpine Cue shortcut uses.
     static let controlOption = UInt32(controlKey | optionKey)
 
     @discardableResult
@@ -18,7 +18,7 @@ enum HotKeys {
         let id = nextID
         nextID += 1
         var reference: EventHotKeyRef?
-        let hotKeyID = EventHotKeyID(signature: OSType(0x4559_4355), id: id)  // "EYCU"
+        let hotKeyID = EventHotKeyID(signature: OSType(0x534E_5043), id: id)  // "SNPC"
         let status = RegisterEventHotKey(UInt32(keyCode), modifiers, hotKeyID, GetApplicationEventTarget(), 0, &reference)
         guard status == noErr, let reference else { return false }
         handlers[id] = handler

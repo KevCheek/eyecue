@@ -1,14 +1,15 @@
 import AppKit
-import EyeCueCore
+import SnowpineCueCore
 import SwiftUI
 
-/// `EyeCue --smoke-test <folder>`: builds the model and view without showing
+/// `SnowpineCue --smoke-test <folder>`: builds the model and view without showing
 /// anything or touching the microphone, checks that simulated speech moves the
 /// prompter, and renders the strip to prompter.png for a visual check.
 enum SmokeTest {
     @MainActor
     static func run(outputDirectory: String) -> Int32 {
-        let suite = "eyecue.smoke-test"
+        guard BrandFonts.allLoaded else { return fail("the brand fonts did not load") }
+        let suite = "snowpine-cue.smoke-test"
         UserDefaults().removePersistentDomain(forName: suite)
         guard let defaults = UserDefaults(suiteName: suite) else { return fail("no defaults") }
         let settings = Settings(defaults: defaults)
@@ -30,7 +31,7 @@ enum SmokeTest {
             .frame(width: CGFloat(settings.panelWidth), height: height)
             .padding(.horizontal, 40)
             .padding(.bottom, 30)
-            .background(Color(red: 0.24, green: 0.27, blue: 0.34))
+            .background(Color(white: 0.2))
         let renderer = ImageRenderer(content: view)
         renderer.scale = 2
         guard let image = renderer.nsImage,

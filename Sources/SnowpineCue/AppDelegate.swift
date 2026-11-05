@@ -1,7 +1,7 @@
 import AppKit
 import Carbon.HIToolbox
 import Combine
-import EyeCueCore
+import SnowpineCueCore
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -40,7 +40,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if isLaunchCheck {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [self] in
                 let sandboxed = ProcessInfo.processInfo.environment["APP_SANDBOX_CONTAINER_ID"] != nil
-                print("LAUNCH \(sandboxed ? "OK" : "FAIL") lines=\(model.lines.count) words=\(model.spokenCount) sandboxed=\(sandboxed)")
+                print("LAUNCH \(sandboxed && BrandFonts.allLoaded ? "OK" : "FAIL") lines=\(model.lines.count) words=\(model.spokenCount) sandboxed=\(sandboxed)")
                 fflush(stdout)
                 exit(sandboxed ? 0 : 1)  // the packaged app must run in the App Sandbox
             }
@@ -112,7 +112,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         if let button = statusItem.button {
             button.image = MenuBarIcon.make()
-            button.toolTip = "EyeCue"
+            button.toolTip = "Snowpine Cue"
         }
         let menu = NSMenu()
         menu.autoenablesItems = false
@@ -170,8 +170,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(.separator())
 
         menu.addItem(item("Audio stays on this Mac. Nothing is recorded.", nil, enabled: false))
-        menu.addItem(item("About EyeCue", #selector(about)))
-        menu.addItem(item("Quit EyeCue", #selector(quit), key: "q", mods: [.command]))
+        menu.addItem(item("About Snowpine Cue", #selector(about)))
+        menu.addItem(item("Quit Snowpine Cue", #selector(quit), key: "q", mods: [.command]))
     }
 
     private func item(_ title: String, _ action: Selector?, key: String = "", mods: NSEvent.ModifierFlags = [],
@@ -219,7 +219,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc private func about() {
         NSApp.activate()
         NSApp.orderFrontStandardAboutPanel(options: [
-            .credits: NSAttributedString(string: "A teleprompter under your camera that follows your voice. Speech is recognized on this Mac; audio is never recorded or sent anywhere."),
+            .credits: NSAttributedString(string: "A teleprompter under your camera that follows your voice. Speech is recognized on this Mac; audio is never recorded or sent anywhere.\n\nMade by Snowpine Code. Free and open source under the MIT License. snowpinecode.com"),
         ])
     }
 
@@ -270,7 +270,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func showProblem(_ message: String) {
         NSApp.activate()
         let alert = NSAlert()
-        alert.messageText = "EyeCue"
+        alert.messageText = "Snowpine Cue"
         alert.informativeText = message
         alert.runModal()
     }

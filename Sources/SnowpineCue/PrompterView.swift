@@ -1,15 +1,17 @@
 import AppKit
-import EyeCueCore
+import SnowpineCueCore
 import SwiftUI
 
+/// Snowpine Code brand 2.0: pure black, white, neutral greys and Pine Blue.
 enum Palette {
-    static let ground = Color(red: 0.043, green: 0.047, blue: 0.055)   // near black, blends with the notch
-    static let paper = Color(red: 0.969, green: 0.973, blue: 0.976)    // words still to say
-    static let spoken = Color(red: 0.635, green: 0.663, blue: 0.682).opacity(0.5)
-    static let next = Color(red: 0.863, green: 0.761, blue: 0.698)     // sand: the next word
-    static let heading = Color(red: 0.690, green: 0.553, blue: 0.533)  // mauve section labels
-    static let quiet = Color(red: 0.635, green: 0.663, blue: 0.682)
-    static let live = Color(red: 0.42, green: 0.80, blue: 0.55)
+    static let ground = Color.black                                     // #000000, blends with the notch
+    static let paper = Color.white                                      // words still to say
+    static let silver = Color(red: 166 / 255, green: 166 / 255, blue: 166 / 255)  // #A6A6A6
+    static let spoken = silver.opacity(0.5)
+    static let next = Color(red: 0, green: 163 / 255, blue: 224 / 255)  // #00A3E0 Pine Blue: the next word
+    static let heading = silver
+    static let quiet = silver
+    static let live = next
 }
 
 /// The strip under the camera. The top band sits behind the notch; the
@@ -61,7 +63,7 @@ struct PrompterView: View {
     private var dotColor: Color {
         switch model.mode {
         case .listening: return Palette.live
-        case .startingMic, .scrolling: return Palette.next
+        case .startingMic, .scrolling: return Palette.paper
         case .paused, .finished: return Palette.quiet.opacity(0.5)
         }
     }

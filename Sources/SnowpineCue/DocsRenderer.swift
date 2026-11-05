@@ -1,14 +1,14 @@
 import AppKit
-import EyeCueCore
+import SnowpineCueCore
 import SwiftUI
 
-/// `EyeCue --render-docs <folder>` draws the README pictures from the real app: the real strip view,
+/// `SnowpineCue --render-docs <folder>` draws the README pictures from the real app: the real strip view,
 /// the real menu items and the real menu bar icon. The live strip hides itself from screenshots,
 /// so the pictures are drawn rather than captured. Nothing is shown and the microphone is not used.
 enum DocsRenderer {
     @MainActor
     static func run(outputDirectory: String) -> Int32 {
-        let suite = "eyecue.render-docs"
+        let suite = "snowpine-cue.render-docs"
         UserDefaults().removePersistentDomain(forName: suite)
         guard let defaults = UserDefaults(suiteName: suite) else { return fail("no defaults") }
         let settings = Settings(defaults: defaults)
@@ -37,10 +37,50 @@ enum DocsRenderer {
         return 0
     }
 
+    /// A made-up talk for the website and video pictures.
+    static let demoScript = ScriptDocument(title: "Demo", sections: [
+        .init(heading: "Monthly update", paragraphs: [
+            "Thanks for joining today. I'll walk you through where the project stands, what changed this month, and what I need from you.",
+            "First, the new booking page went live on Monday, and sign ups are already coming in.",
+        ]),
+    ])
+
+    /// `SnowpineCue --render-frames <folder>` draws the real strip once per word of the demo talk,
+    /// as if it were being read aloud, for the website and the video.
     @MainActor
-    private static func write<V: View>(_ view: V, to url: URL) throws {
+    static func runFrames(outputDirectory: String) -> Int32 {
+        let suite = "snowpine-cue.render-frames"
+        UserDefaults().removePersistentDomain(forName: suite)
+        guard let defaults = UserDefaults(suiteName: suite) else { return fail("no defaults") }
+        let settings = Settings(defaults: defaults)
+        let model = PrompterModel(settings: settings, document: demoScript)
+        let words = model.tokens.filter { $0.spokenIndex != nil }.map(\.text)
+        let band: CGFloat = 38
+        let height = band + CGFloat(settings.visibleLines) * settings.lineHeight + 14
+        let folder = URL(fileURLWithPath: outputDirectory)
+        do {
+            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            var heard: [String] = []
+            for index in 0...words.count {
+                if index > 0 {
+                    heard.append(words[index - 1])
+                    model.applyTranscript(heard.joined(separator: " "))
+                }
+                let view = PrompterView(model: model, settings: settings, topBand: band)
+                    .frame(width: CGFloat(settings.panelWidth), height: height)
+                try write(view, to: folder.appendingPathComponent(String(format: "strip-%03d.png", index)), scale: 3)
+            }
+        } catch {
+            return fail(error.localizedDescription)
+        }
+        print("FRAMES OK words=\(words.count) folder=\(folder.path)")
+        return 0
+    }
+
+    @MainActor
+    private static func write<V: View>(_ view: V, to url: URL, scale: CGFloat = 2) throws {
         let renderer = ImageRenderer(content: view)
-        renderer.scale = 2
+        renderer.scale = scale
         guard let image = renderer.nsImage,
               let tiff = image.tiffRepresentation,
               let bitmap = NSBitmapImageRep(data: tiff),
@@ -95,12 +135,12 @@ struct MenuRow: Identifiable {
 }
 
 private enum DocColors {
-    static let sand = Color(red: 0.863, green: 0.761, blue: 0.698)
-    static let paper = Color(red: 0.969, green: 0.973, blue: 0.976)
-    static let desktopTop = Color(red: 0.22, green: 0.26, blue: 0.35)
-    static let desktopBottom = Color(red: 0.11, green: 0.13, blue: 0.18)
+    static let accent = Palette.next
+    static let paper = Color.white
+    static let desktopTop = Color(white: 0.2)     // #333333
+    static let desktopBottom = Color(white: 0.08) // #141414
     static let menuBar = Color.black.opacity(0.32)
-    static let menu = Color(red: 0.17, green: 0.17, blue: 0.19)
+    static let menu = Color(white: 0.17)
 }
 
 /// A numbered marker that the legend refers to.
@@ -108,15 +148,15 @@ private struct Badge: View {
     let number: Int
     var body: some View {
         Text("\(number)")
-            .font(.custom("AvenirNext-Bold", size: 13))
+            .font(.custom(BrandFonts.headingName, size: 13))
             .foregroundColor(.black)
             .frame(width: 22, height: 22)
-            .background(Circle().fill(DocColors.sand))
+            .background(Circle().fill(DocColors.accent))
             .shadow(color: .black.opacity(0.4), radius: 3, y: 1)
     }
 }
 
-/// The right side of the menu bar, with the EyeCue icon first.
+/// The right side of the menu bar, with the Snowpine Cue icon first.
 private struct StatusIcons: View {
     var highlight = true
     var body: some View {
@@ -126,7 +166,7 @@ private struct StatusIcons: View {
                 .foregroundColor(.white)
                 .frame(width: 22, height: 22)
                 .background(RoundedRectangle(cornerRadius: 5).fill(Color.white.opacity(highlight ? 0.22 : 0)))
-                .overlay(RoundedRectangle(cornerRadius: 6).stroke(DocColors.sand, lineWidth: highlight ? 2 : 0).padding(-3))
+                .overlay(RoundedRectangle(cornerRadius: 6).stroke(DocColors.accent, lineWidth: highlight ? 2 : 0).padding(-3))
             Image(systemName: "wifi").frame(width: 22)
             Image(systemName: "battery.75percent").frame(width: 30)
             Image(systemName: "magnifyingglass").frame(width: 22)
@@ -148,7 +188,7 @@ struct OverviewPicture: View {
     private let height: CGFloat = 545
     private let barHeight: CGFloat = 32
     private let menuWidth: CGFloat = 330
-    // The right-hand icons are laid out at fixed widths (see StatusIcons), so the EyeCue icon sits here:
+    // The right-hand icons are laid out at fixed widths (see StatusIcons), so the Snowpine Cue icon sits here:
     private var iconX: CGFloat { width - 16 - 280 }
     private var menuX: CGFloat { min(iconX - 8, width - 12 - menuWidth) }
     private var stripHeight: CGFloat { barHeight + CGFloat(settings.visibleLines) * settings.lineHeight + 14 }
@@ -218,9 +258,9 @@ struct OverviewPicture: View {
 private struct Legend: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            item(1, "The EyeCue icon in the menu bar.", "Click it for the menu: open or paste a script, settings, and Quit.")
+            item(1, "The Snowpine Cue icon in the menu bar.", "Click it for the menu: open or paste a script, settings, and Quit.")
             item(2, "The strip under your camera.", "Click it to start or pause, scroll over it to move a line, right-click it for the same menu.")
-            item(3, "Quit EyeCue is at the bottom of the menu.", "Command Q works while the menu is open.")
+            item(3, "Quit Snowpine Cue is at the bottom of the menu.", "Command Q works while the menu is open.")
         }
         .padding(22)
         .background(RoundedRectangle(cornerRadius: 14).fill(Color.black.opacity(0.35)))
@@ -230,8 +270,8 @@ private struct Legend: View {
         HStack(alignment: .top, spacing: 12) {
             Badge(number: number)
             VStack(alignment: .leading, spacing: 3) {
-                Text(title).font(.custom("AvenirNext-DemiBold", size: 16)).foregroundColor(DocColors.paper)
-                Text(detail).font(.custom("AvenirNext-Regular", size: 14)).foregroundColor(DocColors.paper.opacity(0.75))
+                Text(title).font(.custom(BrandFonts.headingName, size: 16)).foregroundColor(DocColors.paper)
+                Text(detail).font(.custom(BrandFonts.regularName, size: 14)).foregroundColor(DocColors.paper.opacity(0.75))
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
@@ -273,7 +313,7 @@ struct MenuPicture: View {
     }
 }
 
-/// A close-up of the right side of the menu bar with the EyeCue icon marked.
+/// A close-up of the right side of the menu bar with the Snowpine Cue icon marked.
 struct MenuBarPicture: View {
     var body: some View {
         StatusIcons()
