@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- The App Sandbox with no network entitlement: macOS itself blocks network access. -->
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<!-- Microphone, for following your voice. -->
+	<key>com.apple.security.device.audio-input</key>
+	<true/>
+	<!-- Read the script files you choose in the Open dialog, nothing else. -->
+	<key>com.apple.security.files.user-selected.read-only</key>
+	<true/>
+</dict>
+</plist>
