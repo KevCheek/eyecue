@@ -54,6 +54,7 @@ enum DocsRenderer {
         guard let defaults = UserDefaults(suiteName: suite) else { return fail("no defaults") }
         let settings = Settings(defaults: defaults)
         let model = PrompterModel(settings: settings, document: demoScript)
+        model.showListeningForPictures()
         let words = model.tokens.filter { $0.spokenIndex != nil }.map(\.text)
         let band: CGFloat = 38
         let height = band + CGFloat(settings.visibleLines) * settings.lineHeight + 14

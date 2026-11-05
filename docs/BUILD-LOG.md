@@ -1,5 +1,16 @@
 # Build log
 
+## 2026-11-05: version 0.2.0, Snowpine Cue
+
+Taken over from EyeCue and rebranded for Snowpine Code: new name (EyeCue sounds the same as EyeQue, a registered
+trademark for vision-test apps), bundle id com.snowpinecode.cue, brand 2.0 colors (black, white, neutral greys, Pine Blue
+for the next word), Inter and Plus Jakarta Sans shipped in the app, a new icon reviewed by Codex, copyright Snowpine Code
+LLC, a web page in site/, a narrated video, and a download built by CI. The smoke test and launch check now fail if the
+brand fonts don't load.
+
+Not yet verified (needs a person at the Mac): live voice following with the microphone, the strip staying out of a real
+Zoom share, and the Open Anyway steps on a downloaded copy.
+
 ## 2026-11-05: renamed to EyeCue
 
 The working name was Eyeline, but another MIT notch teleprompter already uses it

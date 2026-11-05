@@ -39,6 +39,9 @@ final class PrompterModel: ObservableObject {
     var spokenCount: Int { script.spokenCount }
     var isRunning: Bool { mode == .startingMic || mode == .listening || mode == .scrolling }
 
+    /// Pictures only: draws the strip as it looks while listening. Never touches the microphone.
+    func showListeningForPictures() { mode = .listening }
+
     var statusText: String {
         switch mode {
         case .paused: return "Paused"

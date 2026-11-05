@@ -2,7 +2,7 @@
 # Builds build/Snowpine Cue.app: a sandboxed, ad-hoc signed menu bar app.
 #   scripts/build-app.sh            build only
 #   scripts/build-app.sh --install  build, then move it to ~/Applications
-# BUNDLE_ID and VERSION can be overridden from the environment.
+# BUNDLE_ID and VERSION can be overridden from the environment. UNIVERSAL=1 builds for Apple silicon and Intel.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -10,8 +10,10 @@ BUNDLE_ID="${BUNDLE_ID:-com.snowpinecode.cue}"
 VERSION="${VERSION:-0.2.0}"
 BUILD_NUMBER="${BUILD_NUMBER:-$(date +%Y%m%d%H%M)}"
 
-swift build -c release
-BIN="$(swift build -c release --show-bin-path)/SnowpineCue"
+ARCHS=()
+if [ "${UNIVERSAL:-}" = "1" ]; then ARCHS=(--arch arm64 --arch x86_64); fi
+swift build -c release ${ARCHS[@]+"${ARCHS[@]}"}
+BIN="$(swift build -c release ${ARCHS[@]+"${ARCHS[@]}"} --show-bin-path)/SnowpineCue"
 
 APP="build/Snowpine Cue.app"
 rm -rf "$APP"
