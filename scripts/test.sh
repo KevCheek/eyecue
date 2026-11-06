@@ -11,8 +11,8 @@ if [ -d "$PLUGINS" ] && ! xcode-select -p | grep -q Xcode.app; then
     EXTRA=(-Xswiftc -plugin-path -Xswiftc "$PLUGINS")
 fi
 
-swift test "${EXTRA[@]}"
+swift test ${EXTRA[@]+"${EXTRA[@]}"}  # safe when empty on the Bash 3.2 macOS ships
 scripts/check-no-network.sh
 swift build
-OUT="${TMPDIR:-/tmp}/eyecue-smoke"
-"$(swift build --show-bin-path)/EyeCue" --smoke-test "$OUT"
+OUT="${TMPDIR:-/tmp}/snowpine-cue-smoke"
+"$(swift build --show-bin-path)/SnowpineCue" --smoke-test "$OUT"

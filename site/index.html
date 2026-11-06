@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; media-src 'self'; style-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Snowpine Cue: a free teleprompter for your Mac</title>
+<meta name="description" content="A free, open source Mac teleprompter that sits under your camera and follows your voice. Speech stays on your Mac.">
+<link rel="canonical" href="https://snowpinecode.github.io/snowpine-cue/">
+<meta property="og:title" content="Snowpine Cue: a free teleprompter for your Mac">
+<meta property="og:description" content="It sits under your camera and follows your voice. Free and open source.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://snowpinecode.github.io/snowpine-cue/">
+<meta property="og:image" content="https://snowpinecode.github.io/snowpine-cue/assets/og-image.png">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a href="https://snowpinecode.com"><img src="assets/logo.svg" alt="Snowpine Code" width="168" height="32"></a>
+  <a href="https://github.com/snowpinecode/snowpine-cue">GitHub</a>
+</div></header>
+
+<main>
+<div class="wrap hero">
+  <div>
+    <img class="icon" src="assets/icon.png" alt="" width="112" height="112">
+    <h1>A teleprompter that follows your voice</h1>
+    <p class="lead">Snowpine Cue puts your script in a small strip right under your MacBook's camera, so you can read it and still look at people.</p>
+    <div class="actions">
+      <a class="btn primary" href="https://github.com/snowpinecode/snowpine-cue/releases/latest">Download for Mac<span class="us"></span></a>
+      <a class="btn" href="https://github.com/snowpinecode/snowpine-cue">View the code</a>
+    </div>
+    <p class="fine">Free and open source. macOS 14 or later. See <a href="#install">how to install</a> first.</p>
+  </div>
+  <figure>
+    <img src="assets/pictures/strip.png" alt="A MacBook screen on a video call, with a black strip under the camera showing a script. The next word to read is blue." width="1400" height="1000">
+    <figcaption>An illustration with the real strip. The names are made up.</figcaption>
+  </figure>
+</div>
+
+<section class="alt"><div class="wrap">
+  <div class="intro"><div class="eyebrow">See it</div><h2>One minute with Snowpine Cue</h2></div>
+  <video controls preload="none" playsinline poster="assets/video-poster.jpg" width="1920" height="1080">
+    <source src="assets/snowpine-cue.mp4" type="video/mp4">
+    <a href="assets/snowpine-cue.mp4">Download the video</a>
+  </video>
+</div></section>
+
+<section><div class="wrap">
+  <div class="intro"><div class="eyebrow">How it works</div><h2>Read your script without looking away</h2></div>
+  <div class="row">
+    <div><h3>It keeps pace with you</h3><p>It listens on your Mac and matches what you say to the script, a few words at a time. The next word lights up in blue.</p></div>
+    <figure><img src="assets/pictures/follow.png" alt="The strip with the words already read dimmed and the next word in blue." loading="lazy" width="1400" height="400"></figure>
+  </div>
+  <div class="row">
+    <div><h3>It keeps your place</h3><p>Pause, go off script or skip a sentence, and it finds your place again. If it ever guesses wrong, one shortcut nudges it back.</p></div>
+    <figure><img src="assets/pictures/skip.png" alt="The strip after a skipped sentence, with the blue word on the next sentence." loading="lazy" width="1400" height="400"></figure>
+  </div>
+  <div class="row">
+    <div><h3>It's built to stay out of your screen share</h3><p>The strip asks macOS to leave it out of screen capture, so people see your slides and not your script. Call apps and macOS versions can differ, so do one test share before a big call.</p></div>
+    <figure><img src="assets/pictures/share.png" alt="Two screens side by side. On your screen the strip shows above the slides. What they see is only the slides." loading="lazy" width="1400" height="565"><figcaption>An illustration of how it's designed to work.</figcaption></figure>
+  </div>
+  <div class="row">
+    <div><h3>Bring the script you already have</h3><p>Open plain text, Markdown, Word, RTF or OpenDocument files, or just paste your script in. Slide decks saved as HTML with speaker notes load a slide at a time.</p></div>
+    <figure><img src="assets/pictures/script.png" alt="The supported file types, and the Open Script and Paste Script from Clipboard menu items." loading="lazy" width="1400" height="500"></figure>
+  </div>
+</div></section>
+
+<section class="alt"><div class="wrap">
+  <div class="intro"><div class="eyebrow">Private</div><h2>Your words stay on your Mac</h2>
+    <p>Speech is recognized on your Mac. Audio is never recorded. The app runs in the macOS sandbox with no network permission, so macOS itself blocks it from the internet. There's no account, no analytics and no tracking. You can check all of this in the code.</p></div>
+</div></section>
+
+<section id="install"><div class="wrap">
+  <div class="intro"><div class="eyebrow">Install</div><h2>Get it running</h2>
+    <p>I don't pay for an Apple developer certificate on this free app, so macOS will warn you the first time. Here's how to get past that.</p></div>
+  <ol class="steps">
+    <li><a href="https://github.com/snowpinecode/snowpine-cue/releases/latest">Download the latest zip</a>, open it, and drag Snowpine Cue to your Applications folder.</li>
+    <li>Open it. macOS will say it can't check the app. Click <strong>Done</strong>.</li>
+    <li>Go to System Settings &gt; Privacy &amp; Security, scroll down, and click <strong>Open Anyway</strong>.</li>
+    <li>The strip appears under your camera with a short welcome guide. Press <strong>Control Option P</strong> and read it out loud. macOS asks to use the microphone and speech recognition the first time. Allow both.</li>
+  </ol>
+  <p class="fine narrow">To remove it, quit from its menu and drag it to the Trash. It has no installer and nothing else to clean up beyond its saved settings.</p>
+  <div class="narrow gap">
+    <h3>Or build it yourself</h3>
+    <p class="sub">Building it yourself takes about a minute and skips the warning. You need the Xcode Command Line Tools.</p>
+    <pre><code>git clone https://github.com/snowpinecode/snowpine-cue.git
+cd snowpine-cue
+scripts/build-app.sh --install</code></pre>
+  </div>
+</div></section>
+
+<section class="alt"><div class="wrap">
+  <div class="intro"><div class="eyebrow">Questions</div><h2>Good to know</h2></div>
+  <details><summary>Is it really free?</summary><p>Yes. It's open source under the MIT License, so you can use it, change it and share it.</p></details>
+  <details><summary>Which Macs does it work on?</summary><p>Any Mac on macOS 14 or later. It's best on a MacBook with a notch and the built-in camera. On other Macs the strip hangs from the top of the screen.</p></details>
+  <details><summary>Is there an iPhone version?</summary><p>Not yet. It's Mac only for now.</p></details>
+  <details><summary>How do I open the menu or quit?</summary><p>Click the three dots on the right side of the strip, or right-click the strip. Quit is at the bottom of the menu.</p></details>
+  <details><summary>The strip doesn't move when I talk. What now?</summary><p>Check that Follow My Voice is ticked in the menu, and that Snowpine Cue is allowed under Microphone and Speech Recognition in System Settings. If it says on-device speech isn't available, turn on Dictation under Keyboard settings so macOS downloads the speech model.</p></details>
+  <details><summary>Who made this?</summary><p>Snowpine Code. I build custom websites, apps and automations. <a href="https://snowpinecode.com">See what else I do</a>.</p></details>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+  <a href="https://snowpinecode.com"><img src="assets/logo.svg" alt="Snowpine Code" width="168" height="32"></a>
+  <div class="links">
+    <a href="https://github.com/snowpinecode/snowpine-cue">Code on GitHub</a>
+    <a href="https://github.com/snowpinecode/snowpine-cue/blob/main/SECURITY.md">Security</a>
+    <a href="https://github.com/snowpinecode/snowpine-cue/blob/main/LICENSE">MIT License</a>
+    <a href="https://snowpinecode.com">snowpinecode.com</a>
+  </div>
+  <p class="fine">This page has no analytics or cookies of its own. GitHub hosts it. Copyright 2026 Snowpine Code LLC.</p>
+</div></footer>
+</body>
+</html>

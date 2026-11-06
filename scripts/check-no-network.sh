@@ -6,19 +6,19 @@ cd "$(dirname "$0")/.."
 
 fail=0
 if grep -rnE "URLSession|URLRequest|NSURLConnection|NWConnection|NWListener|import Network|WKWebView|CFSocket|CFStream|SocketPort" Sources/; then
-    echo "A networking API appears in Sources/. EyeCue promises no network access." >&2
+    echo "A networking API appears in Sources/. Snowpine Cue promises no network access." >&2
     fail=1
 fi
-if ! grep -q "requiresOnDeviceRecognition = true" Sources/EyeCue/SpeechFollower.swift; then
+if ! grep -q "requiresOnDeviceRecognition = true" Sources/SnowpineCue/SpeechFollower.swift; then
     echo "Speech recognition must stay on-device (requiresOnDeviceRecognition = true)." >&2
     fail=1
 fi
-if grep -q "com.apple.security.network" Resources/EyeCue.entitlements; then
+if grep -q "com.apple.security.network" Resources/SnowpineCue.entitlements; then
     echo "The entitlements file grants network access." >&2
     fail=1
 fi
 # The sandbox key must be present and true, not just mentioned.
-if [ "$(/usr/libexec/PlistBuddy -c "Print :com.apple.security.app-sandbox" Resources/EyeCue.entitlements 2>/dev/null)" != "true" ]; then
+if [ "$(/usr/libexec/PlistBuddy -c "Print :com.apple.security.app-sandbox" Resources/SnowpineCue.entitlements 2>/dev/null)" != "true" ]; then
     echo "The App Sandbox entitlement is missing or not true." >&2
     fail=1
 fi
