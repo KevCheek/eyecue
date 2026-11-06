@@ -21,7 +21,7 @@ scripts/build-app.sh --install   # builds the app and moves it to ~/Applications
 | Web page | `site/`, published by `.github/workflows/pages.yml` |
 
 ## Publish a download
-Set the version and push a tag, such as `v0.2.0`. `.github/workflows/release.yml` tests, builds and attaches the zip.
+Set the version and push a tag, such as `v0.2.0`. `.github/workflows/release.yml` tests, builds and attaches the zip. The page links to `releases/latest/download/Snowpine-Cue.zip`, so it always gets the newest one.
 
 ## Check before every release
 - Read a script aloud and check it keeps pace.

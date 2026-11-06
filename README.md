@@ -34,7 +34,7 @@ not your script.
 
 ### 1. Install
 
-**Download it:** get the zip from the [latest release](https://github.com/snowpinecode/snowpine-cue/releases/latest), open it, and drag Snowpine Cue to Applications. The app isn't signed with a paid Apple developer certificate, so macOS warns you the first time. Open it, click **Done**, then go to System Settings > Privacy & Security, scroll down and click **Open Anyway**.
+**Download it:** [download the zip](https://github.com/snowpinecode/snowpine-cue/releases/latest/download/Snowpine-Cue.zip), open it, and drag Snowpine Cue to Applications. The app isn't signed with a paid Apple developer certificate, so macOS warns you the first time. Open it, click **Done**, then go to System Settings > Privacy & Security, scroll down and click **Open Anyway**.
 
 **Or build it yourself,** which takes about a minute and skips the warning. You need the Xcode Command Line Tools (run `xcode-select --install` once) or Xcode. Then in Terminal:
 

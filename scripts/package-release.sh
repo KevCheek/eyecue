@@ -13,4 +13,6 @@ ZIP="build/Snowpine-Cue-$VERSION.zip"
 rm -f "$ZIP"
 ditto -c -k --sequesterRsrc --keepParent "$APP" "$ZIP"
 (cd build && shasum -a 256 "$(basename "$ZIP")" > "$(basename "$ZIP").sha256")
+# A copy with no version in its name, so the page's Download button always gets the latest release.
+cp "$ZIP" build/Snowpine-Cue.zip
 echo "Packaged $ZIP"
