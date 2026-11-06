@@ -8,8 +8,9 @@ for the next word), Inter and Plus Jakarta Sans shipped in the app, a new icon r
 LLC, a web page in site/, a narrated video, and a download built by CI. The smoke test and launch check now fail if the
 brand fonts don't load.
 
-Not yet verified (needs a person at the Mac): live voice following with the microphone, the strip staying out of a real
-Zoom share, and the Open Anyway steps on a downloaded copy.
+Checked by a person at the Mac: voice following works live, and the strip stayed out of a real Zoom share and its recording
+(2026-11-05, macOS 27). Other call apps and macOS versions may differ. Not yet checked: the voice-following fix read aloud, and the
+Open Anyway steps on a downloaded copy.
 
 ## 2026-11-05: renamed to EyeCue
 
