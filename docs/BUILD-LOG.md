@@ -1,27 +1,21 @@
 # Build log
 
-## 2026-11-05: version 0.2.0, Snowpine Cue
+## 2026-11-05: version 0.2.0
 
-Taken over from EyeCue and rebranded for Snowpine Code: new name (EyeCue sounds the same as EyeQue, a registered
-trademark for vision-test apps), bundle id com.snowpinecode.cue, brand 2.0 colors (black, white, neutral greys, Pine Blue
-for the next word), Inter and Plus Jakarta Sans shipped in the app, a new icon reviewed by Codex, copyright Snowpine Code
-LLC, a web page in site/, a narrated video, and a download built by CI. The smoke test and launch check now fail if the
-brand fonts don't load.
+Rebranded for Snowpine Code: the Snowpine Cue name, bundle id com.snowpinecode.cue, brand 2.0 colors (black, white, neutral
+greys, Pine Blue for the next word), Inter and Plus Jakarta Sans shipped in the app, a new icon reviewed by Codex, copyright
+Snowpine Code LLC, a web page in site/, a narrated video, and a download built by CI. The smoke test and launch check now fail
+if the brand fonts don't load.
 
-Checked by a person at the Mac: voice following works live, and the strip stayed out of a real Zoom share and its recording
-(2026-11-05, macOS 27). Other call apps and macOS versions may differ. Not yet checked: the voice-following fix read aloud, and the
-Open Anyway steps on a downloaded copy.
+Voice following no longer stalls when the recognizer adds or drops a word, and three dots on the strip open the menu.
 
-## 2026-11-05: renamed to EyeCue
-
-The working name was Eyeline, but another MIT notch teleprompter already uses it
-(github.com/Shauryagulati/eyeline, June 2026). EyeQue was considered and dropped: it is a
-registered trademark for vision-test apps (USPTO 5508883). Renamed the package, targets,
-bundle id (local.eyecue.EyeCue), hotkey signature (EYCU) and docs to EyeCue.
+Checked by a person at the Mac: voice following keeps pace live, the three dots work, and the strip stayed out of a real Zoom
+share and its recording (macOS 27). Other call apps and macOS versions may differ. Not yet checked: the Open Anyway steps on a
+downloaded copy.
 
 ## 2026-11-05: version 0.1.0
 
-First build (as Eyeline). A menu bar app that shows a teleprompter strip under the MacBook notch, follows the
+First build. A menu bar app that shows a teleprompter strip under the MacBook notch, follows the
 speaker's voice with on-device speech recognition, and is excluded from screen capture.
 
 Why build it: the notch teleprompters on the market either scroll at a fixed speed while they hear
