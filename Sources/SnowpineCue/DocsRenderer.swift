@@ -259,8 +259,8 @@ struct OverviewPicture: View {
 private struct Legend: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            item(1, "The Snowpine Cue icon in the menu bar.", "Click it for the menu: open or paste a script, settings, and Quit.")
-            item(2, "The strip under your camera.", "Click it to start or pause, scroll over it to move a line, right-click it for the same menu.")
+            item(1, "The Snowpine Cue icon in the menu bar.", "It opens the menu: open or paste a script, settings, and Quit.")
+            item(2, "The strip under your camera.", "Click it to start or pause, scroll over it to move a line. The three dots or a right-click open the same menu.")
             item(3, "Quit Snowpine Cue is at the bottom of the menu.", "Command Q works while the menu is open.")
         }
         .padding(22)

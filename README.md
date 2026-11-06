@@ -52,13 +52,14 @@ That puts **Snowpine Cue** in the Applications folder in your home folder. Open 
 Snowpine Cue has no window and no Dock icon. When it opens you'll see two things:
 
 - **The strip** under your camera, showing a short welcome guide.
-- **The Snowpine Cue icon in the menu bar**, a small notch with three lines under it. Click it for the
-  menu.
+- **Three dots on the right side of the strip.** Click them, or right-click the strip, for the menu.
+- **The Snowpine Cue icon in the menu bar**, a small notch with three lines under it, which opens the
+  same menu.
 
 ![The Snowpine Cue icon in the menu bar, to the left of the Wi-Fi icon](docs/menu-bar.png)
 
-Can't see the icon? On MacBooks with a notch, a crowded menu bar hides some icons behind the notch.
-**Right-click the strip** instead: it opens the same menu.
+Can't see the icon? On MacBooks with a notch, a crowded menu bar hides some icons behind the notch,
+and menu bar organizers can hide new ones. Use the three dots on the strip instead.
 
 ### 3. Start
 
@@ -73,8 +74,8 @@ from Clipboard**. **Show Welcome Guide** brings the guide back any time.
 
 ### 5. Quit
 
-Choose **Quit Snowpine Cue** at the bottom of the menu (from the menu bar icon or a right-click on the
-strip). Command Q also works while the menu is open.
+Choose **Quit Snowpine Cue** at the bottom of the menu (from the three dots on the strip, a right-click
+on the strip, or the menu bar icon). Command Q also works while the menu is open.
 
 ## Using it on a call
 
@@ -90,8 +91,8 @@ it waits; when you pick up again, even a sentence later, it finds your place.
 | Control Option R | Back to the start |
 | Control Option H | Show or hide the strip |
 
-With the mouse: click the strip to start or pause, scroll over it to move by lines, and right-click
-it for the menu.
+With the mouse: click the strip to start or pause, scroll over it to move by lines, and click the
+three dots or right-click it for the menu.
 
 The menu also sets the text size, the strip width, how many lines show, and the scroll speed for
 manual mode (when Follow My Voice is off).
@@ -104,7 +105,7 @@ To check how a file will be read before a call:
 
 ## Troubleshooting
 
-- **No menu bar icon.** Right-click the strip for the menu. If the strip is hidden too, press
+- **No menu bar icon.** Click the three dots on the strip, or right-click it, for the menu. If the strip is hidden too, press
   Control Option H to show it.
 - **The strip doesn't move when I talk.** Check that Follow My Voice is ticked in the menu, and that
   Snowpine Cue is allowed under System Settings > Privacy & Security > Microphone and > Speech

@@ -55,6 +55,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         hostingView.onScroll = { [weak self] delta in self?.scrolled(delta) }
         hostingView.onClick = { [weak self] in self?.model.toggle() }
         hostingView.makeMenu = { [weak self] in self?.makeMenu() ?? NSMenu() }
+        hostingView.menuBandHeight = topBand
         panel.contentView = hostingView
     }
 
@@ -80,6 +81,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let band = notch > 0 ? notch : 26
         if band != topBand {
             topBand = band
+            hostingView.menuBandHeight = band
             hostingView.rootView = PrompterView(model: model, settings: settings, topBand: band)
         }
         let width = min(CGFloat(settings.panelWidth), screen.frame.width - 40)

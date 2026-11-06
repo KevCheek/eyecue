@@ -72,3 +72,49 @@ fix any password problems before then. That's it from me.
     tracker.reset()
     #expect(tracker.position == 0)
 }
+
+/// The worst number of words the strip falls behind while one script is read, word by word.
+private func worstLag(script: [String], heard: [String], expected: [Int]) -> Int {
+    var tracker = VoiceTracker(keys: script)
+    var soFar: [String] = []
+    var worst = 0
+    for (index, word) in heard.enumerated() {
+        soFar.append(word)
+        tracker.update(transcript: soFar.joined(separator: " "))
+        worst = max(worst, expected[index] - tracker.position)
+    }
+    return worst
+}
+
+@Test func anExtraHeardWordDoesNotStallTheStrip() {
+    let script = keys(update)
+    var heard = script
+    heard.insert("um", at: 12)
+    var expected = Array(1...script.count)
+    expected.insert(12, at: 12)
+    #expect(worstLag(script: script, heard: heard, expected: expected) <= 1)
+}
+
+@Test func aDroppedWordDoesNotStallTheStrip() {
+    let script = keys(update)
+    var heard = script
+    heard.remove(at: 12)
+    var expected = Array(1...script.count)
+    expected.remove(at: 12)
+    #expect(worstLag(script: script, heard: heard, expected: expected) <= 1)
+}
+
+@Test func twoWordsHeardAsOneDoNotStallTheStrip() {
+    let script = keys("Thanks for joining today and the sign ups are already coming in from the new page this week")
+    var heard = script
+    heard.replaceSubrange(6...7, with: ["signups"])
+    var expected = Array(1...script.count)
+    expected.replaceSubrange(6...7, with: [8])
+    #expect(worstLag(script: script, heard: heard, expected: expected) <= 1)
+}
+
+@Test func theExtraMatchingDoesNotLetSideTalkJumpFarAhead() {
+    var tracker = VoiceTracker(keys: keys(update))
+    tracker.update(transcript: "so let me fix that password thing before the team goes")
+    #expect(tracker.position < 12)
+}

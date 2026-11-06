@@ -56,6 +56,11 @@ struct PrompterView: View {
             Text(model.progressText)
                 .font(.system(size: 11, weight: .medium).monospacedDigit())
                 .foregroundColor(Palette.quiet)
+            // Opens the menu. PrompterHostingView handles the click.
+            Image(systemName: "ellipsis.circle.fill")
+                .font(.system(size: 15))
+                .foregroundColor(Palette.paper)
+                .accessibilityLabel("Menu")
         }
         .padding(.horizontal, 18)
     }

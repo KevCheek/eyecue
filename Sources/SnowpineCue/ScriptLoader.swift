@@ -67,7 +67,7 @@ enum WelcomeScript {
         .init(heading: "Welcome to Snowpine Cue", paragraphs: [
             "This strip sits right under your camera, so you can read your script and still look at the people you are talking to.",
             "Press Control Option P to start, or click the strip. With Follow My Voice on, Snowpine Cue listens on this Mac and moves along as you speak. Nothing you say leaves your Mac.",
-            "To open a script, change settings or quit, click the Snowpine Cue icon in the menu bar, a small notch with three lines under it. You can also right-click this strip for the same menu.",
+            "To open a script, change settings or quit, click the three dots on the right side of this strip, or right-click the strip. The small icon in the menu bar opens the same menu.",
             "Control Option Down and Up move a line, Control Option R goes back to the start, and Control Option H hides the strip.",
             "The strip is hidden from screen sharing. Do one quick test share before a big call.",
         ]),
