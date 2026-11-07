@@ -5,9 +5,9 @@
 A free, open source teleprompter that sits right under your MacBook's camera and follows your voice.
 Made by [Snowpine Code](https://snowpinecode.com).
 
-**[See the page and the one-minute video](https://snowpinecode.github.io/snowpine-cue/)**
+**[See the page and the video](https://snowpinecode.github.io/snowpine-cue/)**
 
-[![Watch the one-minute video](docs/video-poster.jpg)](https://snowpinecode.github.io/snowpine-cue/)
+[![Watch the video](docs/video-poster.jpg)](https://snowpinecode.github.io/snowpine-cue/)
 
 Reading a script on a video call makes your eyes drift away from the camera. Snowpine Cue puts the
 script in a small strip at the top of the screen, next to the camera in the notch, and moves
@@ -28,13 +28,22 @@ not your script.
 - **Reads your scripts.** Plain text, Markdown, Word (.docx), RTF, OpenDocument, or paste from the
   clipboard. Slide decks saved as HTML with speaker notes in `data-notes` attributes load one
   slide at a time, with the slide titles as labels.
-- **Manual mode.** Turn off Follow My Voice to scroll at a set speed instead.
+- **Your size, your place.** Drag the strip's sides or bottom edge to resize it, or switch to a
+  floating window you can move to any screen and resize from any edge. It's hidden from screen sharing too.
+- **Manual mode.** Turn off Follow My Voice to scroll at a set speed instead. Change the speed with a
+  shortcut or a slider, and it shows in words a minute on the strip.
+- **One-click updates.** It tells you when a new version is out, and one click installs it.
 
 ## Getting started
 
 ### 1. Install
 
-**Download it:** [download the zip](https://github.com/snowpinecode/snowpine-cue/releases/latest/download/Snowpine-Cue.zip), open it, and drag Snowpine Cue to Applications. The app isn't signed with a paid Apple developer certificate, so macOS warns you the first time. Open it, click **Done**, then go to System Settings > Privacy & Security, scroll down and click **Open Anyway**.
+**Download it:**
+
+1. [Download the zip](https://github.com/snowpinecode/snowpine-cue/releases/latest/download/Snowpine-Cue.zip), open it, and drag Snowpine Cue to Applications.
+2. Open it. The app isn't signed with a paid Apple developer certificate, so macOS says it was blocked. Click **Done**.
+3. Go to System Settings > Privacy & Security, scroll down and click **Open Anyway**.
+4. In the box that pops up, click **Open Anyway** again (not Move to Trash), then confirm with your password or Touch ID. You only do this once.
 
 **Or build it yourself,** which takes about a minute and skips the warning. You need the Xcode Command Line Tools (run `xcode-select --install` once) or Xcode. Then in Terminal:
 
@@ -90,9 +99,11 @@ it waits; when you pick up again, even a sentence later, it finds your place.
 | Control Option Down / Up | Next or previous line |
 | Control Option R | Back to the start |
 | Control Option H | Show or hide the strip |
+| Control Option F | Switch between the strip and the floating window |
+| Control Option Right / Left | Scroll faster or slower when Follow My Voice is off |
 
-With the mouse: click the strip to start or pause, scroll over it to move by lines, and click the
-three dots or right-click it for the menu.
+With the mouse: click the strip to start or pause, scroll over it to move by lines, drag its sides or
+bottom edge to resize it, and click the three dots or right-click it for the menu.
 
 The menu also sets the text size, the strip width, how many lines show, and the scroll speed for
 manual mode (when Follow My Voice is off).
@@ -102,6 +113,14 @@ To check how a file will be read before a call:
 ```bash
 "$HOME/Applications/Snowpine Cue.app/Contents/MacOS/SnowpineCue" --check-script "My talk.md"
 ```
+
+## Updating
+
+Snowpine Cue tells you when a new version is out, and one click installs it. Nothing installs without
+that click. Choose **Check for Updates…** in the menu any time, or turn off **Check for Updates
+Automatically**. With it off, no check starts unless you ask.
+
+Version 0.2.0 can't update itself: [download the newest version](https://github.com/snowpinecode/snowpine-cue/releases/latest/download/Snowpine-Cue.zip) once and replace the old copy. macOS asks for the microphone and speech recognition one more time after that, and not again on later updates.
 
 ## Troubleshooting
 
@@ -122,8 +141,13 @@ To check how a file will be read before a call:
   do that for your language, voice follow stays off; Snowpine Cue never falls back to a server.
 - Audio is **never recorded or saved**. The microphone is on only while the prompter is running.
 - The app runs in the **macOS App Sandbox with no network entitlement**, so macOS itself blocks it
-  from reaching the internet. The code has no networking calls, and CI checks that it stays that
-  way (`scripts/check-no-network.sh`).
+  from reaching the internet. The app's own code has no networking calls, and CI checks that it stays
+  that way (`scripts/check-no-network.sh`).
+- **The only network use is checking for updates.** That is done by the Downloader helper in
+  [Sparkle](https://sparkle-project.org), an open source update tool. It fetches only the update feed
+  and the new version from GitHub, over https. Your speech, audio and scripts are never part of it. GitHub
+  sees what it sees for any download. You can turn off automatic checks in the menu.
+- Each update must carry a valid signature matching the key in the app, checked before it is unpacked.
 - No accounts, no analytics, no tracking. Your settings are stored in the app's own preferences.
 
 ## Requirements
@@ -146,25 +170,24 @@ Because the strip hides from screenshots, the pictures in this README are drawn 
 ## Build and test
 
 ```bash
-scripts/test.sh          # unit tests, no-network check, smoke test
-scripts/build-app.sh     # build/Snowpine Cue.app
+scripts/test.sh          # unit tests, no-network check, smoke test, window check
+scripts/build-app.sh     # build/Products.noindex/Snowpine Cue.app
 ```
 
 The matching logic lives in `Sources/SnowpineCueCore` (no UI, fully unit tested). The app is in
 `Sources/SnowpineCue`. `SnowpineCue --smoke-test <folder>` renders the strip to `prompter.png` without
 showing a window or touching the microphone.
 
-Builds are signed ad hoc, so macOS warns on downloaded copies. A paid Apple Developer ID would remove the warning.
-`scripts/package-release.sh` builds the download, and pushing a tag like `v0.2.0` publishes it on the Releases page.
+Local builds are signed ad hoc. Releases are signed with one self-signed certificate, so macOS keeps its permissions across updates. macOS still warns the first time on a downloaded copy; a paid Apple Developer ID would remove that. See [docs/MAINTAINING.md](docs/MAINTAINING.md) for how releases and updates work.
 
 The web page is in `site/` and publishes to GitHub Pages when `main` changes.
 
 ## Contributing
 
-Issues and pull requests are welcome. Please keep the privacy guarantees: no network access, no
-recording, on-device recognition only. `scripts/test.sh` must pass.
+Issues and pull requests are welcome. Please keep the privacy guarantees: no network access in the
+app itself (only Sparkle's Downloader helper, for updates), no recording, on-device recognition only. `scripts/test.sh` must pass.
 
 ## License
 
 MIT. See [LICENSE](LICENSE). The bundled Inter and Plus Jakarta Sans fonts are under the SIL Open Font
-License (see `Resources/Fonts`). The Snowpine Code name and logo are not part of the MIT grant.
+License (see `Resources/Fonts`). Sparkle, the one third-party dependency, is under its own MIT-style license (see `Resources/Sparkle-LICENSE.txt`) and pinned to an exact version in `Package.swift`. The Snowpine Code name and logo are not part of the MIT grant.

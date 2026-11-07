@@ -42,7 +42,7 @@
 </div>
 
 <section class="alt"><div class="wrap">
-  <div class="intro"><div class="eyebrow">See it</div><h2>One minute with Snowpine Cue</h2></div>
+  <div class="intro"><div class="eyebrow">See it</div><h2>See Snowpine Cue in action</h2></div>
   <video controls preload="none" playsinline poster="assets/video-poster.jpg" width="1920" height="1080">
     <source src="assets/snowpine-cue.mp4" type="video/mp4">
     <a href="assets/snowpine-cue.mp4">Download the video</a>
@@ -64,6 +64,14 @@
     <figure><img src="assets/pictures/share.png" alt="Two screens side by side. On your screen the strip shows above the slides. What they see is only the slides." loading="lazy" width="1400" height="565"><figcaption>An illustration of how it's designed to work.</figcaption></figure>
   </div>
   <div class="row">
+    <div><h3>Make it your size</h3><p>Drag the strip's sides or bottom edge to resize it. Or switch to a floating window you can move to any screen and resize from any edge. It's hidden from screen sharing too.</p></div>
+    <figure><img src="assets/pictures/size.png" alt="A larger floating window with a script in it on a Mac screen, with an arrow on its corner showing it can be dragged to resize." loading="lazy" width="1400" height="1000"><figcaption>The real window with a made-up talk.</figcaption></figure>
+  </div>
+  <div class="row">
+    <div><h3>Set your own pace</h3><p>Rather not have it listen? Turn off Follow My Voice and it scrolls at a set speed. Change the speed with a shortcut or a slider, and it shows right on the strip.</p></div>
+    <figure><img src="assets/pictures/speed.png" alt="The strip scrolling at a set speed, showing 150 words a minute in its top band." loading="lazy" width="1400" height="400"></figure>
+  </div>
+  <div class="row">
     <div><h3>Bring the script you already have</h3><p>Open plain text, Markdown, Word, RTF or OpenDocument files, or just paste your script in. Slide decks saved as HTML with speaker notes load a slide at a time.</p></div>
     <figure><img src="assets/pictures/script.png" alt="The supported file types, and the Open Script and Paste Script from Clipboard menu items." loading="lazy" width="1400" height="500"></figure>
   </div>
@@ -71,7 +79,7 @@
 
 <section class="alt"><div class="wrap">
   <div class="intro"><div class="eyebrow">Private</div><h2>Your words stay on your Mac</h2>
-    <p>Speech is recognized on your Mac. Audio is never recorded. The app runs in the macOS sandbox with no network permission, so macOS itself blocks it from the internet. There's no account, no analytics and no tracking. You can check all of this in the code.</p></div>
+    <p>Speech is recognized on your Mac. Audio is never recorded, and your scripts never leave it. The app runs in the macOS sandbox with no network permission of its own. The only thing that goes online is the update check, which a separate helper runs against GitHub, and you can turn that off. There's no account, no analytics and no tracking. You can check all of this in the code.</p></div>
 </div></section>
 
 <section id="install"><div class="wrap">
@@ -81,6 +89,7 @@
     <li><a href="https://github.com/snowpinecode/snowpine-cue/releases/latest/download/Snowpine-Cue.zip">Download the zip</a>, open it, and drag Snowpine Cue to your Applications folder.</li>
     <li>Open it. macOS will say it can't check the app. Click <strong>Done</strong>.</li>
     <li>Go to System Settings &gt; Privacy &amp; Security, scroll down, and click <strong>Open Anyway</strong>.</li>
+    <li>In the box that pops up, click <strong>Open Anyway</strong> again (not Move to Trash), then confirm with your password or Touch ID. You only do this once.</li>
     <li>The strip appears under your camera with a short welcome guide. Press <strong>Control Option P</strong> and read it out loud. macOS asks to use the microphone and speech recognition the first time. Allow both.</li>
   </ol>
   <p class="fine narrow">To remove it, quit from its menu and drag it to the Trash. It has no installer and nothing else to clean up beyond its saved settings.</p>
@@ -98,6 +107,7 @@ scripts/build-app.sh --install</code></pre>
   <details><summary>Is it really free?</summary><p>Yes. It's open source under the MIT License, so you can use it, change it and share it.</p></details>
   <details><summary>Which Macs does it work on?</summary><p>Any Mac on macOS 14 or later. It's best on a MacBook with a notch and the built-in camera. On other Macs the strip hangs from the top of the screen.</p></details>
   <details><summary>Is there an iPhone version?</summary><p>Not yet. It's Mac only for now.</p></details>
+  <details><summary>How do updates work?</summary><p>It checks GitHub when it opens and once a day. If a new version is out it tells you, and one click installs it. Nothing installs without that click, and each update must carry a matching signature. Turn off Check for Updates Automatically in the menu and it only checks when you ask. If you have version 0.2.0, download the new version once by hand.</p></details>
   <details><summary>How do I open the menu or quit?</summary><p>Click the three dots on the right side of the strip, or right-click the strip. Quit is at the bottom of the menu.</p></details>
   <details><summary>The strip doesn't move when I talk. What now?</summary><p>Check that Follow My Voice is ticked in the menu, and that Snowpine Cue is allowed under Microphone and Speech Recognition in System Settings. If it says on-device speech isn't available, turn on Dictation under Keyboard settings so macOS downloads the speech model.</p></details>
   <details><summary>Who made this?</summary><p>Snowpine Code. I build custom websites, apps and automations. <a href="https://snowpinecode.com">See what else I do</a>.</p></details>

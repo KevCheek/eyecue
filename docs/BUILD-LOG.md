@@ -1,5 +1,20 @@
 # Build log
 
+## 2026-11-06: version 0.3.0
+
+- Resize by dragging: the strip's sides move together so it stays centered under the camera, and its bottom edge snaps to whole lines.
+- Floating Window (menu, or Control Option F): a larger window that can be dragged to any screen and resized from any edge or corner. It remembers its place and size and is hidden from screen sharing like the strip.
+- Scroll speed: Control Option Right and Left change it by 10 words a minute, the Scroll Speed menu has a slider (60 to 300), and the speed shows in the strip when Follow My Voice is off.
+- In-app updates with Sparkle 2.10.1 (pinned, the one third-party dependency). It checks GitHub at launch and once a day, says when a new version is out, and one click installs it. Check for Updates and Check for Updates Automatically are in the menu; with automatic checks off, background checks are refused.
+- The app still has no network entitlement. Sparkle's separate Downloader helper fetches the feed and the update. Every update must carry a valid EdDSA signature. New entitlements, for Sparkle only: `cs.disable-library-validation` and a mach-lookup exception for its two local services.
+- Releases are signed with one self-signed certificate instead of ad hoc, so macOS keeps the microphone and speech permissions across updates.
+- Builds go to `build/Products.noindex`, so Spotlight doesn't list a second copy.
+- Script loader limits: headings count toward the length limit, a limit on sections, packages and rtfd refused.
+- `SnowpineCue --window-check` drives the real panel with simulated presses and drags, and `--update-check` reads the feed with no window.
+- An independent review (Codex) found one medium problem, fixed with a test: dragging a floating window's edge near the side of the screen pushed the opposite edge.
+
+Checked here on an M5 MacBook Pro, macOS 27: 38 unit tests, the no-network, smoke and window checks, a signed universal build, and `--update-check` reaching GitHub through Sparkle's helper.
+
 ## 2026-11-05: version 0.2.0
 
 Rebranded for Snowpine Code: the Snowpine Cue name, bundle id com.snowpinecode.cue, brand 2.0 colors (black, white, neutral

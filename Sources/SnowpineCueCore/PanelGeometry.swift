@@ -112,6 +112,19 @@ public enum PanelGeometry {
         return (CGRect(x: minX, y: minY, width: width, height: height), lines)
     }
 
+    /// The same, but a dragged edge stops at the edge of the screen, so the opposite edge never gets pushed.
+    public static func resizeFloating(_ frame: CGRect, edges: ResizeEdges, dx: CGFloat, dy: CGFloat,
+                                      limits: PanelLimits, within bounds: CGRect) -> (frame: CGRect, lines: Int) {
+        let roomWide = edges.contains(.left) ? frame.maxX - bounds.minX : bounds.maxX - frame.minX
+        let roomTall = edges.contains(.top) ? bounds.maxY - frame.minY : frame.maxY - bounds.minY
+        let widest = max(limits.width.lowerBound, min(limits.width.upperBound, roomWide))
+        let linesThatFit = Int(((roomTall - limits.chrome) / limits.lineHeight).rounded(.down))
+        let tallest = max(limits.lines.lowerBound, min(limits.lines.upperBound, linesThatFit))
+        let tighter = PanelLimits(width: limits.width.lowerBound...widest, lines: limits.lines.lowerBound...tallest,
+                                  lineHeight: limits.lineHeight, chrome: limits.chrome)
+        return resizeFloating(frame, edges: edges, dx: dx, dy: dy, limits: tighter)
+    }
+
     /// Keeps a window inside the bounds when it fits there, and pins it to the top left when it doesn't,
     /// so its top band (where it is dragged from) is always reachable.
     public static func clamp(_ frame: CGRect, to bounds: CGRect) -> CGRect {

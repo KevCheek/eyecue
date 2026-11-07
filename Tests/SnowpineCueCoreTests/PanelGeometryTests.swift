@@ -78,3 +78,18 @@ private let size = CGSize(width: 600, height: 52 + 3 * 34)
     #expect(tooBig.minX == 0)
     #expect(tooBig.maxY == screen.maxY)   // the top band stays reachable
 }
+
+@Test func aDraggedEdgeStopsAtTheScreenSoTheOppositeEdgeStaysPut() {
+    let screen = CGRect(x: 0, y: 0, width: 1440, height: 900)
+    let frame = CGRect(x: 600, y: 300, width: 820, height: limits.height(lines: 3))
+    let right = PanelGeometry.resizeFloating(frame, edges: .right, dx: 100, dy: 0, limits: limits, within: screen)
+    #expect(right.frame.minX == 600)
+    #expect(right.frame.maxX == 1440)
+    let bottom = PanelGeometry.resizeFloating(frame, edges: .bottom, dx: 0, dy: -5000, limits: limits, within: screen)
+    #expect(bottom.frame.maxY == frame.maxY)
+    #expect(bottom.frame.minY >= 0)
+    let left = CGRect(x: 40, y: 300, width: 820, height: limits.height(lines: 3))
+    let leftward = PanelGeometry.resizeFloating(left, edges: .left, dx: -100, dy: 0, limits: limits, within: screen)
+    #expect(leftward.frame.maxX == left.maxX)
+    #expect(leftward.frame.minX == 0)
+}

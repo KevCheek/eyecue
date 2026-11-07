@@ -207,7 +207,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             return
         }
         if settings.floating {
-            let result = PanelGeometry.resizeFloating(start.frame, edges: edges, dx: dx, dy: dy, limits: start.limits)
+            let bounds = screen(for: start.frame)?.frame ?? homeScreen?.frame ?? start.frame
+            let result = PanelGeometry.resizeFloating(start.frame, edges: edges, dx: dx, dy: dy, limits: start.limits, within: bounds)
             settings.floatTopLeft = CGPoint(x: result.frame.minX, y: result.frame.maxY)
             if settings.floatWidth != Double(result.frame.width) { settings.floatWidth = Double(result.frame.width) }
             if settings.floatLines != result.lines { settings.floatLines = result.lines }
