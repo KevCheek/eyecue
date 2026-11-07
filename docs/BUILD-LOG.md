@@ -4,6 +4,8 @@
 
 No changes to how Snowpine Cue works. This release exists to prove in-app updates end to end: a copy of the version before it finds this one, and one click installs it.
 
+Checked by a person at the Mac on Nov 6: the previous version installed the update in place.
+
 ## 2026-11-06: version 0.3.0
 
 - Resize by dragging: the strip's sides move together so it stays centered under the camera, and its bottom edge snaps to whole lines.
