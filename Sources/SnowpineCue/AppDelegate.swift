@@ -9,14 +9,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     let settings: Settings
     lazy var model = PrompterModel(settings: settings, document: WelcomeScript.document)
 
-    private var panel: PrompterPanel!
-    private var hostingView: PrompterHostingView!
+    private(set) var panel: PrompterPanel!
+    private(set) var hostingView: PrompterHostingView!
     private var statusItem: NSStatusItem!
     private var cancellables = Set<AnyCancellable>()
     private var scrollTotal: CGFloat = 0
     private var topBand: CGFloat = 32
+    private var viewIsFloating = false
+    /// Where a resize or move started.
+    private var drag: (frame: NSRect, width: Double, lines: Int, limits: PanelLimits, moving: Bool, floating: Bool)?
     /// `--launch-check` starts the app without showing the strip, reports, and quits (used by CI).
     private let isLaunchCheck = CommandLine.arguments.contains("--launch-check")
+    /// `--update-check` reads the update feed with no menu bar icon, strip or hotkeys, reports, and quits.
+    private let isUpdateCheck = CommandLine.arguments.contains("--update-check")
+    private var updateCheck: AnyObject?
+    private lazy var updater: Updater = MainActor.assumeIsolated { Updater() }
+    /// `--render-docs` draws the menu as a packaged app shows it, with the update items.
+    var showUpdateItemsForDocs = false
 
     init(settings: Settings = Settings()) {
         self.settings = settings
@@ -24,6 +33,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        if isUpdateCheck {
+            MainActor.assumeIsolated {
+                let check = UpdateCheck()
+                updateCheck = check
+                check.run()
+            }
+            return
+        }
         setUpStatusItem()
         setUpPanel()
         registerHotKeys()
@@ -36,6 +53,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         NotificationCenter.default.addObserver(self, selector: #selector(screensChanged),
                                                name: NSApplication.didChangeScreenParametersNotification, object: nil)
         applySettings()
+        if !isLaunchCheck { updater.start(checkNow: true) }
 
         if isLaunchCheck {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [self] in
@@ -55,11 +73,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         hostingView.onScroll = { [weak self] delta in self?.scrolled(delta) }
         hostingView.onClick = { [weak self] in self?.model.toggle() }
         hostingView.makeMenu = { [weak self] in self?.makeMenu() ?? NSMenu() }
+        hostingView.onDragBegan = { [weak self] edges in self?.dragBegan(edges) }
+        hostingView.onDrag = { [weak self] edges, dx, dy in self?.dragged(edges, dx, dy) }
+        hostingView.onDragEnded = { [weak self] in self?.dragEnded() }
         hostingView.menuBandHeight = topBand
         panel.contentView = hostingView
     }
 
-    private func applySettings() {
+    /// Sets up the panel without showing it, for `--window-check`.
+    func setUpForChecks() {
+        setUpPanel()
+        applySettings()
+    }
+
+    func applySettings() {
+        fitToScreen()  // before the layout, so the text is laid out for the width actually shown
         model.relayout()
         model.settingsChanged()
         panel.setHiddenFromCapture(settings.hideFromSharing)
@@ -71,24 +99,140 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
 
-    @objc private func screensChanged() { placePanel() }
+    @objc private func screensChanged() { applySettings() }
+
+    /// The screen with the camera notch (the built-in display), or the main screen.
+    private var homeScreen: NSScreen? {
+        NSScreen.screens.first(where: { $0.safeAreaInsets.top > 0 }) ?? NSScreen.main ?? NSScreen.screens.first
+    }
+
+    /// The room the prompter has: the strip from the top of its screen down to the Dock,
+    /// the floating window the whole screen it is on.
+    private func space() -> (width: CGFloat, height: CGFloat, band: CGFloat)? {
+        if settings.floating {
+            guard let home = homeScreen else { return nil }
+            let bounds = screen(for: savedFloatingFrame(home: home))?.frame ?? home.frame
+            return (bounds.width, bounds.height, Settings.floatingBand)
+        }
+        guard let screen = homeScreen else { return nil }
+        let notch = screen.safeAreaInsets.top
+        let top = notch > 0 ? screen.frame.maxY : screen.visibleFrame.maxY
+        return (screen.frame.width - 40, top - screen.visibleFrame.minY - 12, notch > 0 ? notch : 26)
+    }
+
+    /// Keeps the saved size within the screen, so every edge stays reachable. A size saved on a
+    /// bigger screen shrinks to fit the one in use.
+    private func fitToScreen() {
+        guard let room = space() else { return }
+        let limits = settings.limits(band: room.band, maxWidth: room.width, maxHeight: room.height)
+        if CGFloat(settings.panelWidth) > limits.width.upperBound { settings.panelWidth = Double(limits.width.upperBound) }
+        if settings.visibleLines > limits.lines.upperBound { settings.visibleLines = limits.lines.upperBound }
+    }
+
+    private func placePanel() {
+        // A move in progress owns the frame, as long as the button is still down and the mode hasn't changed.
+        if let drag, drag.moving, drag.floating == settings.floating, NSEvent.pressedMouseButtons & 1 == 1 { return }
+        guard let frame = settings.floating ? floatingFrame() : stripFrame() else { return }
+        panel.setFrame(frame, display: true)
+    }
+
+    /// Rebuilds the view when the top band or the shape changes.
+    private func useBand(_ band: CGFloat) {
+        hostingView.resizableEdges = settings.floating ? .all : [.left, .right, .bottom]
+        hostingView.dragMoves = settings.floating
+        guard band != topBand || settings.floating != viewIsFloating else { return }
+        topBand = band
+        viewIsFloating = settings.floating
+        hostingView.menuBandHeight = band
+        hostingView.rootView = PrompterView(model: model, settings: settings, topBand: band)
+    }
 
     /// Centers the strip at the top of the screen with a notch (the built-in display),
     /// or just under the menu bar on screens without one.
-    private func placePanel() {
-        guard let screen = NSScreen.screens.first(where: { $0.safeAreaInsets.top > 0 }) ?? NSScreen.main ?? NSScreen.screens.first else { return }
+    private func stripFrame() -> NSRect? {
+        guard let screen = homeScreen else { return nil }
         let notch = screen.safeAreaInsets.top
-        let band = notch > 0 ? notch : 26
-        if band != topBand {
-            topBand = band
-            hostingView.menuBandHeight = band
-            hostingView.rootView = PrompterView(model: model, settings: settings, topBand: band)
-        }
+        useBand(notch > 0 ? notch : 26)
         let width = min(CGFloat(settings.panelWidth), screen.frame.width - 40)
-        let height = band + CGFloat(settings.visibleLines) * settings.lineHeight + 14
+        let height = settings.panelHeight(band: topBand)
         let top = notch > 0 ? screen.frame.maxY : screen.visibleFrame.maxY
-        panel.setFrame(NSRect(x: (screen.frame.midX - width / 2).rounded(), y: top - height, width: width, height: height),
-                       display: true)
+        return NSRect(x: (screen.frame.midX - width / 2).rounded(), y: top - height, width: width, height: height)
+    }
+
+    /// The floating window at its saved place and size. The first time, it opens near the top
+    /// of the screen with the camera.
+    private func savedFloatingFrame(home: NSScreen) -> NSRect {
+        let width = CGFloat(settings.floatWidth)
+        let height = settings.panelHeight(band: Settings.floatingBand)
+        let topLeft = settings.floatTopLeft
+            ?? CGPoint(x: (home.visibleFrame.midX - width / 2).rounded(), y: home.visibleFrame.maxY - 48)
+        return NSRect(x: topLeft.x, y: topLeft.y - height, width: width, height: height)
+    }
+
+    /// The floating window where it was left, kept on a screen.
+    private func floatingFrame() -> NSRect? {
+        guard let home = homeScreen else { return nil }
+        useBand(Settings.floatingBand)
+        let saved = savedFloatingFrame(home: home)
+        let bounds = screen(for: saved)?.frame ?? home.frame
+        // fitToScreen has already made it fit; this only guards against a screen change since then.
+        let frame = NSRect(x: saved.minX, y: saved.maxY - min(saved.height, bounds.height),
+                           width: min(saved.width, bounds.width), height: min(saved.height, bounds.height))
+        return PanelGeometry.clamp(frame, to: bounds)
+    }
+
+    /// The screen the floating window is on: the one under its top band, else the one it overlaps most.
+    private func screen(for frame: NSRect) -> NSScreen? {
+        let grab = NSPoint(x: frame.midX, y: frame.maxY - 10)
+        if let screen = NSScreen.screens.first(where: { $0.frame.contains(grab) }) { return screen }
+        let overlaps = NSScreen.screens.map { ($0, $0.frame.intersection(frame)) }.filter { !$0.1.isNull }
+        return overlaps.max(by: { $0.1.width * $0.1.height < $1.1.width * $1.1.height })?.0
+    }
+
+    // MARK: Resize and move
+
+    private func dragBegan(_ edges: ResizeEdges) {
+        let room = space() ?? (CGFloat(Settings.widthRange.upperBound), 10_000, topBand)
+        drag = (panel.frame, settings.panelWidth, settings.visibleLines,
+                settings.limits(band: topBand, maxWidth: room.width, maxHeight: room.height),
+                edges.isEmpty, settings.floating)
+    }
+
+    private func dragged(_ edges: ResizeEdges, _ dx: CGFloat, _ dy: CGFloat) {
+        // Ignore the rest of a drag that began before a switch between the strip and the floating window.
+        guard let start = drag, start.floating == settings.floating else { return }
+        if edges.isEmpty {
+            guard settings.floating else { return }
+            panel.setFrameOrigin(NSPoint(x: (start.frame.minX + dx).rounded(), y: (start.frame.minY + dy).rounded()))
+            return
+        }
+        if settings.floating {
+            let result = PanelGeometry.resizeFloating(start.frame, edges: edges, dx: dx, dy: dy, limits: start.limits)
+            settings.floatTopLeft = CGPoint(x: result.frame.minX, y: result.frame.maxY)
+            if settings.floatWidth != Double(result.frame.width) { settings.floatWidth = Double(result.frame.width) }
+            if settings.floatLines != result.lines { settings.floatLines = result.lines }
+        } else {
+            let result = PanelGeometry.resizeStrip(width: CGFloat(start.width), lines: start.lines, edges: edges,
+                                                   dx: dx, dy: dy, limits: start.limits)
+            if settings.stripWidth != Double(result.width) { settings.stripWidth = Double(result.width) }
+            if settings.stripLines != result.lines { settings.stripLines = result.lines }
+        }
+        // Follow the pointer now rather than after the settings debounce.
+        model.relayout()
+        placePanel()
+    }
+
+    private func dragEnded() {
+        let ended = drag
+        drag = nil
+        // Save where the floating window was left, unless the mode changed during the move.
+        if let ended, ended.moving, ended.floating, settings.floating {
+            let frame = panel.frame
+            let bounds = screen(for: frame)?.frame ?? homeScreen?.frame ?? frame
+            let kept = PanelGeometry.clamp(frame, to: bounds)
+            settings.floatTopLeft = CGPoint(x: kept.minX, y: kept.maxY)
+        }
+        applySettings()
     }
 
     private func scrolled(_ delta: CGFloat) {
@@ -106,6 +250,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         HotKeys.register(keyCode: kVK_DownArrow) { [weak self] in self?.model.moveLines(1) }
         HotKeys.register(keyCode: kVK_UpArrow) { [weak self] in self?.model.moveLines(-1) }
         HotKeys.register(keyCode: kVK_ANSI_H) { [weak self] in self?.settings.showPrompter.toggle() }
+        HotKeys.register(keyCode: kVK_RightArrow) { [weak self] in self?.faster() }
+        HotKeys.register(keyCode: kVK_LeftArrow) { [weak self] in self?.slower() }
+        HotKeys.register(keyCode: kVK_ANSI_F) { [weak self] in self?.toggleFloating() }
     }
 
     // MARK: Menu
@@ -134,6 +281,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.removeAllItems()
         let down = String(Character(UnicodeScalar(NSDownArrowFunctionKey)!))
         let up = String(Character(UnicodeScalar(NSUpArrowFunctionKey)!))
+        let right = String(Character(UnicodeScalar(NSRightArrowFunctionKey)!))
+        let left = String(Character(UnicodeScalar(NSLeftArrowFunctionKey)!))
+        let dragHint = settings.floating ? "Or drag the window's edges" : "Or drag the strip's sides and bottom"
 
         menu.addItem(item(model.isRunning ? "Pause" : "Start", #selector(toggleRunning), key: "p", mods: [.control, .option]))
         menu.addItem(item("Back to Start", #selector(backToStart), key: "r", mods: [.control, .option]))
@@ -151,6 +301,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(item("Follow My Voice", #selector(toggleFollowVoice), state: settings.followVoice))
         menu.addItem(item("Hide from Screen Sharing", #selector(toggleHideFromSharing), state: settings.hideFromSharing))
         menu.addItem(item("Show Prompter", #selector(toggleShowPrompter), key: "h", mods: [.control, .option], state: settings.showPrompter))
+        menu.addItem(item("Floating Window", #selector(toggleFloating), key: "f", mods: [.control, .option], state: settings.floating))
         menu.addItem(submenu("Text Size", [
             item("Larger", #selector(fontLarger)),
             item("Smaller", #selector(fontSmaller)),
@@ -158,21 +309,34 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(submenu("Width", [
             item("Wider", #selector(wider)),
             item("Narrower", #selector(narrower)),
+            .separator(),
+            item(dragHint, nil, enabled: false),
         ]))
-        menu.addItem(submenu("Lines", (2...6).map { count in
+        let lineChoices = settings.lineRange.lowerBound...min(settings.lineRange.upperBound, 12)
+        menu.addItem(submenu("Lines", lineChoices.map { count in
             let it = item("\(count)", #selector(setLines(_:)), state: settings.visibleLines == count)
             it.tag = count
             return it
-        }))
+        } + [.separator(), item(dragHint, nil, enabled: false)]))
+        let slider = NSMenuItem()
+        slider.view = SpeedSliderView(value: settings.wordsPerMinute, range: Settings.speedRange) { [weak self] value in
+            self?.settings.setSpeed(value)
+        }
         menu.addItem(submenu("Scroll Speed", [
-            item("\(Int(settings.wordsPerMinute)) words a minute, when not following your voice", nil, enabled: false),
-            item("Faster", #selector(faster)),
-            item("Slower", #selector(slower)),
+            slider,
+            item("Faster", #selector(faster), key: right, mods: [.control, .option]),
+            item("Slower", #selector(slower), key: left, mods: [.control, .option]),
+            .separator(),
+            item("Used when Follow My Voice is off", nil, enabled: false),
         ]))
         menu.addItem(.separator())
 
-        menu.addItem(item("Audio stays on this Mac. Nothing is recorded.", nil, enabled: false))
+        menu.addItem(item("Audio and scripts stay on this Mac.", nil, enabled: false))
         menu.addItem(item("About Snowpine Cue", #selector(about)))
+        if updater.isAvailable || showUpdateItemsForDocs {
+            menu.addItem(item("Check for Updates\u{2026}", #selector(checkForUpdates), enabled: updater.canCheckForUpdates || showUpdateItemsForDocs))
+            menu.addItem(item("Check for Updates Automatically", #selector(toggleAutomaticUpdates), state: updater.automaticallyChecks || showUpdateItemsForDocs))
+        }
         menu.addItem(item("Quit Snowpine Cue", #selector(quit), key: "q", mods: [.command]))
     }
 
@@ -213,22 +377,33 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc private func wider() { settings.adjustWidth(by: 40) }
     @objc private func narrower() { settings.adjustWidth(by: -40) }
     @objc private func setLines(_ sender: NSMenuItem) { settings.visibleLines = sender.tag }
-    @objc private func faster() { settings.adjustSpeed(by: 15) }
-    @objc private func slower() { settings.adjustSpeed(by: -15) }
+    @objc private func faster() { changeSpeed(by: 10) }
+    @objc private func slower() { changeSpeed(by: -10) }
+    @objc private func toggleFloating() { settings.floating.toggle() }
+
+    private func changeSpeed(by delta: Double) {
+        settings.adjustSpeed(by: delta)
+        let speed = Int(settings.wordsPerMinute)
+        // Kept short: on a MacBook the left of the top band is beside the notch.
+        model.flash(settings.followVoice ? "Manual speed \(speed) wpm" : "Speed \(speed) wpm")
+    }
     @objc private func quit() { NSApp.terminate(nil) }
     @objc private func showWelcome() { model.load(WelcomeScript.document, from: nil) }
+
+    @MainActor @objc private func checkForUpdates() { updater.checkForUpdates() }
+    @MainActor @objc private func toggleAutomaticUpdates() { updater.automaticallyChecks.toggle() }
 
     @objc private func about() {
         NSApp.activate()
         NSApp.orderFrontStandardAboutPanel(options: [
-            .credits: NSAttributedString(string: "A teleprompter under your camera that follows your voice. Speech is recognized on this Mac; audio is never recorded or sent anywhere.\n\nMade by Snowpine Code. Free and open source under the MIT License. snowpinecode.com"),
+            .credits: NSAttributedString(string: "A teleprompter under your camera that follows your voice. Speech is recognized on this Mac; audio and scripts are never recorded or sent anywhere. The only network use is checking GitHub for updates.\n\nMade by Snowpine Code. Free and open source under the MIT License. snowpinecode.com"),
         ])
     }
 
     @objc private func openScript() {
         NSApp.activate()
         let open = NSOpenPanel()
-        var types: [UTType] = [.plainText, .text, .html, .rtf, .rtfd]
+        var types: [UTType] = [.plainText, .text, .html, .rtf]
         for ext in ["md", "markdown", "docx", "doc", "odt"] {
             if let type = UTType(filenameExtension: ext) { types.append(type) }
         }

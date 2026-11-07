@@ -19,11 +19,13 @@ enum ScriptLoader {
     /// Generous limits: an hour-long talk is about 60,000 characters.
     static let maxFileBytes = 20_000_000
     static let maxCharacters = 300_000
+    /// A long deck has a few hundred slides.
+    static let maxSections = 2_000
 
     /// The system importer for each rich format, set explicitly so a file can't pick a different
     /// importer (for example HTML renamed to .doc) by what it contains.
     private static let richTypes: [String: NSAttributedString.DocumentType] = [
-        "docx": .officeOpenXML, "doc": .docFormat, "rtf": .rtf, "rtfd": .rtfd, "odt": .openDocument,
+        "docx": .officeOpenXML, "doc": .docFormat, "rtf": .rtf, "odt": .openDocument,
     ]
 
     /// Text, Markdown and deck HTML are parsed directly; Word, RTF and OpenDocument
@@ -31,7 +33,9 @@ enum ScriptLoader {
     static func load(_ url: URL) throws -> ScriptDocument {
         let ext = url.pathExtension.lowercased()
         let title = url.deletingPathExtension().lastPathComponent
-        let size = try url.resourceValues(forKeys: [.totalFileSizeKey, .fileSizeKey])
+        let size = try url.resourceValues(forKeys: [.totalFileSizeKey, .fileSizeKey, .isDirectoryKey])
+        // Packages (folders that look like files) aren't scripts, and their size isn't one file's size.
+        if size.isDirectory == true { throw LoadError.empty }
         if (size.totalFileSize ?? size.fileSize ?? 0) > maxFileBytes { throw LoadError.tooLarge }
 
         let document: ScriptDocument
@@ -47,7 +51,7 @@ enum ScriptLoader {
             document = ScriptDocument.parse(text, format: format, title: title)
         }
         guard !document.isEmpty else { throw LoadError.empty }
-        try checkLength(document.sections.flatMap(\.paragraphs).joined(separator: " "))
+        if document.displayedCharacters > maxCharacters || document.sections.count > maxSections { throw LoadError.tooLong }
         return document
     }
 

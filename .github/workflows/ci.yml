@@ -21,4 +21,4 @@ jobs:
       - name: Build the signed app bundle
         run: scripts/build-app.sh
       - name: Launch check (sandboxed app starts, loads the welcome script, quits)
-        run: '"build/Snowpine Cue.app/Contents/MacOS/SnowpineCue" --launch-check'
+        run: '"build/Products.noindex/Snowpine Cue.app/Contents/MacOS/SnowpineCue" --launch-check'

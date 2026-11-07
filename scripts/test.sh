@@ -16,3 +16,4 @@ scripts/check-no-network.sh
 swift build
 OUT="${TMPDIR:-/tmp}/snowpine-cue-smoke"
 "$(swift build --show-bin-path)/SnowpineCue" --smoke-test "$OUT"
+"$(swift build --show-bin-path)/SnowpineCue" --window-check

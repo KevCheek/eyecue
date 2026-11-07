@@ -26,9 +26,9 @@ struct PrompterView: View {
     var body: some View {
         let lineHeight = settings.lineHeight
         ZStack(alignment: .top) {
-            UnevenRoundedRectangle(topLeadingRadius: 0, bottomLeadingRadius: 20,
-                                   bottomTrailingRadius: 20, topTrailingRadius: 0, style: .continuous)
-                .fill(Palette.ground)
+            shape.fill(Palette.ground)
+            shape.strokeBorder(Color.white.opacity(settings.floating ? 0.14 : 0), lineWidth: 1)
+            grip
             VStack(spacing: 0) {
                 header.frame(height: topBand)
                 VStack(alignment: .leading, spacing: 0) {
@@ -46,13 +46,50 @@ struct PrompterView: View {
         }
     }
 
+    /// The strip hangs from the top of the screen, so only its bottom corners are round.
+    private var shape: UnevenRoundedRectangle {
+        let top: CGFloat = settings.floating ? 16 : 0
+        let bottom: CGFloat = settings.floating ? 16 : 20
+        return UnevenRoundedRectangle(topLeadingRadius: top, bottomLeadingRadius: bottom,
+                                      bottomTrailingRadius: bottom, topTrailingRadius: top, style: .continuous)
+    }
+
+    /// A hint that the edges can be dragged: a short bar under the strip, or ridges in the
+    /// floating window's bottom right corner.
+    private var grip: some View {
+        Canvas { context, size in
+            let color = GraphicsContext.Shading.color(Palette.quiet.opacity(0.4))
+            if settings.floating {
+                for step in 0..<3 {
+                    let inset = CGFloat(step) * 4.5
+                    var path = Path()
+                    path.move(to: CGPoint(x: size.width - 7 - inset, y: size.height - 4))
+                    path.addLine(to: CGPoint(x: size.width - 4, y: size.height - 7 - inset))
+                    context.stroke(path, with: color, style: StrokeStyle(lineWidth: 1.3, lineCap: .round))
+                }
+            } else {
+                let bar = CGRect(x: size.width / 2 - 16, y: size.height - 7, width: 32, height: 3.5)
+                context.fill(Path(roundedRect: bar, cornerRadius: 1.75), with: color)
+            }
+        }
+        .allowsHitTesting(false)
+    }
+
     private var header: some View {
         HStack(spacing: 6) {
             Circle().fill(dotColor).frame(width: 7, height: 7)
             Text(model.statusText)
                 .font(.system(size: 11, weight: .medium))
                 .foregroundColor(Palette.quiet)
+                .lineLimit(1)
             Spacer()
+            if !settings.followVoice {
+                // The manual scroll speed, so it can be set without opening the menu.
+                Text("\(Int(settings.wordsPerMinute)) wpm")
+                    .font(.system(size: 11, weight: .medium).monospacedDigit())
+                    .foregroundColor(Palette.quiet)
+                    .padding(.trailing, 4)
+            }
             Text(model.progressText)
                 .font(.system(size: 11, weight: .medium).monospacedDigit())
                 .foregroundColor(Palette.quiet)

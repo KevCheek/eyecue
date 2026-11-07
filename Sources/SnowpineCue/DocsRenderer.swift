@@ -22,6 +22,7 @@ enum DocsRenderer {
             heard.append(word)
             model.applyTranscript(heard.joined(separator: " "))
         }
+        app.showUpdateItemsForDocs = true
         let rows = MenuRow.rows(from: app.makeMenu())
 
         let folder = URL(fileURLWithPath: outputDirectory)
@@ -30,6 +31,7 @@ enum DocsRenderer {
             try write(OverviewPicture(model: model, settings: settings, rows: rows),
                       to: folder.appendingPathComponent("overview.png"))
             try write(MenuBarPicture(), to: folder.appendingPathComponent("menu-bar.png"))
+            try write(floatingPicture(), to: folder.appendingPathComponent("floating.png"))
         } catch {
             return fail(error.localizedDescription)
         }
@@ -71,6 +73,15 @@ enum DocsRenderer {
                     .frame(width: CGFloat(settings.panelWidth), height: height)
                 try write(view, to: folder.appendingPathComponent(String(format: "strip-%03d.png", index)), scale: 3)
             }
+            // floating-900.png: the floating window without markers, for the web page.
+            try write(floatingPicture(annotated: false), to: folder.appendingPathComponent("floating-900.png"))
+            // strip-900.png: scrolling at a set speed (Follow My Voice off), with the speed in the top band.
+            settings.followVoice = false
+            model.setPosition(20)
+            model.showScrollingForPictures()
+            let view = PrompterView(model: model, settings: settings, topBand: band)
+                .frame(width: CGFloat(settings.panelWidth), height: height)
+            try write(view, to: folder.appendingPathComponent("strip-900.png"), scale: 3)
         } catch {
             return fail(error.localizedDescription)
         }
@@ -98,6 +109,109 @@ enum DocsRenderer {
     private static func fail(_ message: String) -> Int32 {
         FileHandle.standardError.write(Data("DOCS FAIL: \(message)\n".utf8))
         return 1
+    }
+}
+
+extension DocsRenderer {
+    /// The floating window partway through the demo talk, scrolling at a set speed.
+    @MainActor
+    static func floatingPicture(annotated: Bool = true) -> FloatingPicture {
+        let suite = "snowpine-cue.render-floating"
+        UserDefaults().removePersistentDomain(forName: suite)
+        let settings = Settings(defaults: UserDefaults(suiteName: suite) ?? .standard)
+        settings.floating = true
+        settings.followVoice = false
+        var talk = demoScript
+        talk.sections[0].paragraphs.append(
+            "Second, help calls are down by a third since the new how-to pages went up. Third, I need two volunteers to try the mobile app before Friday.")
+        let model = PrompterModel(settings: settings, document: talk)
+        model.setPosition(17)
+        model.showScrollingForPictures()
+        return FloatingPicture(model: model, settings: settings, annotated: annotated)
+    }
+}
+
+/// The floating window over a desktop, with what can be dragged marked (or plain, for the web page,
+/// where the text beside the picture explains it).
+struct FloatingPicture: View {
+    @ObservedObject var model: PrompterModel
+    @ObservedObject var settings: Settings
+    var annotated = true
+
+    private let width: CGFloat = 1300
+    private var height: CGFloat { annotated ? 760 : windowY + windowHeight + 64 }
+    private let barHeight: CGFloat = 32
+    private var windowWidth: CGFloat { CGFloat(settings.panelWidth) }
+    private var windowHeight: CGFloat { settings.panelHeight(band: Settings.floatingBand) }
+    private var windowX: CGFloat { (width - windowWidth) / 2 }
+    private let windowY: CGFloat = 96
+
+    var body: some View {
+        ZStack(alignment: .topLeading) {
+            LinearGradient(colors: [DocColors.desktopTop, DocColors.desktopBottom], startPoint: .top, endPoint: .bottom)
+
+            HStack(spacing: 18) {
+                Image(systemName: "apple.logo")
+                Text("Finder").fontWeight(.bold)
+                Text("File"); Text("Edit"); Text("View"); Text("Window"); Text("Help")
+                Spacer()
+            }
+            .font(.system(size: 13.5))
+            .foregroundColor(.white)
+            .padding(.leading, 18)
+            .frame(width: width, height: barHeight)
+            .background(DocColors.menuBar)
+
+            StatusIcons(highlight: false)
+                .frame(height: barHeight)
+                .offset(x: width - 16 - 280)
+
+            UnevenRoundedRectangle(bottomLeadingRadius: 11, bottomTrailingRadius: 11)
+                .fill(Color.black)
+                .frame(width: 190, height: barHeight)
+                .overlay(Circle().fill(Color(white: 0.12)).frame(width: 7, height: 7))
+                .offset(x: (width - 190) / 2)
+
+            PrompterView(model: model, settings: settings, topBand: Settings.floatingBand)
+                .frame(width: windowWidth, height: windowHeight)
+                .shadow(color: .black.opacity(0.5), radius: 22, y: 10)
+                .offset(x: windowX, y: windowY)
+
+            if annotated {
+                Badge(number: 1).offset(x: windowX - 34, y: windowY + 4)
+                Badge(number: 2).offset(x: windowX + windowWidth + 10, y: windowY + windowHeight - 26)
+                Badge(number: 3).offset(x: windowX + windowWidth - 150, y: windowY - 30)
+
+                FloatingLegend()
+                    .frame(width: 620, alignment: .leading)
+                    .offset(x: (width - 620) / 2, y: windowY + windowHeight + 56)
+            }
+        }
+        .frame(width: width, height: height)
+        .clipped()
+    }
+}
+
+private struct FloatingLegend: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            item(1, "Floating Window, in the menu or Control Option F.", "A larger window you can drag anywhere, even to a second screen. Click it to start or pause.")
+            item(2, "Drag any edge or corner to resize it.", "The strip under the camera resizes the same way, from its sides and bottom edge.")
+            item(3, "The scroll speed, when Follow My Voice is off.", "Control Option Right is faster, Control Option Left is slower, or use the slider in the menu.")
+        }
+        .padding(22)
+        .background(RoundedRectangle(cornerRadius: 14).fill(Color.black.opacity(0.35)))
+    }
+
+    private func item(_ number: Int, _ title: String, _ detail: String) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Badge(number: number)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title).font(.custom("AvenirNext-DemiBold", size: 16)).foregroundColor(DocColors.paper)
+                Text(detail).font(.custom("AvenirNext-Regular", size: 14)).foregroundColor(DocColors.paper.opacity(0.75))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
     }
 }
 
@@ -129,6 +243,8 @@ struct MenuRow: Identifiable {
         switch Int(scalar.value) {
         case NSDownArrowFunctionKey: text += "\u{2193}"
         case NSUpArrowFunctionKey: text += "\u{2191}"
+        case NSLeftArrowFunctionKey: text += "\u{2190}"
+        case NSRightArrowFunctionKey: text += "\u{2192}"
         default: text += item.keyEquivalent.uppercased()
         }
         return text
@@ -186,7 +302,7 @@ struct OverviewPicture: View {
     let rows: [MenuRow]
 
     private let width: CGFloat = 1300
-    private let height: CGFloat = 545
+    private let height: CGFloat = 600  // room for the whole menu, update items included
     private let barHeight: CGFloat = 32
     private let menuWidth: CGFloat = 330
     // The right-hand icons are laid out at fixed widths (see StatusIcons), so the Snowpine Cue icon sits here:
@@ -260,7 +376,7 @@ private struct Legend: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             item(1, "The Snowpine Cue icon in the menu bar.", "It opens the menu: open or paste a script, settings, and Quit.")
-            item(2, "The strip under your camera.", "Click it to start or pause, scroll over it to move a line. The three dots or a right-click open the same menu.")
+            item(2, "The strip under your camera.", "Click it to start or pause, scroll over it to move a line, drag its sides or bottom edge to resize it. The three dots or a right-click open the same menu.")
             item(3, "Quit Snowpine Cue is at the bottom of the menu.", "Command Q works while the menu is open.")
         }
         .padding(22)

@@ -14,6 +14,8 @@ final class PrompterModel: ObservableObject {
     @Published private(set) var currentLine = 0
     @Published private(set) var mode: Mode = .paused
     @Published private(set) var title = ""
+    /// A short message shown in place of the status for a moment, such as a new scroll speed.
+    @Published private(set) var notice: String?
 
     let settings: Settings
     let speech = SpeechFollower()
@@ -21,6 +23,9 @@ final class PrompterModel: ObservableObject {
     private var script: PreparedScript
     private var tracker: VoiceTracker
     private var timer: Timer?
+    private var noticeTimer: Timer?
+    /// The speed the scroll timer runs at, so only a new speed restarts it.
+    private var timerSpeed: Double?
 
     /// Shown to the user when something needs their attention (permissions, no on-device speech).
     var onProblem: ((String) -> Void)?
@@ -41,8 +46,11 @@ final class PrompterModel: ObservableObject {
 
     /// Pictures only: draws the strip as it looks while listening. Never touches the microphone.
     func showListeningForPictures() { mode = .listening }
+    /// Pictures only: draws the prompter as it looks while scrolling at a set speed. Starts no timer.
+    func showScrollingForPictures() { mode = .scrolling }
 
     var statusText: String {
+        if let notice { return notice }
         switch mode {
         case .paused: return "Paused"
         case .startingMic: return "Starting mic"
@@ -55,6 +63,15 @@ final class PrompterModel: ObservableObject {
     var progressText: String {
         guard spokenCount > 0 else { return "" }
         return "\(Int((Double(position) / Double(spokenCount) * 100).rounded()))%"
+    }
+
+    /// Shows a message in the strip's top band for a couple of seconds.
+    func flash(_ message: String) {
+        notice = message
+        noticeTimer?.invalidate()
+        noticeTimer = Timer.scheduledTimer(withTimeInterval: 2.2, repeats: false) { [weak self] _ in
+            self?.notice = nil
+        }
     }
 
     // MARK: Script
@@ -144,7 +161,7 @@ final class PrompterModel: ObservableObject {
 
     /// Picks up a new scroll speed while scrolling.
     func settingsChanged() {
-        if mode == .scrolling { startTimer() }
+        if mode == .scrolling && timerSpeed != settings.wordsPerMinute { startTimer() }
     }
 
     private func heard(_ text: String) {
@@ -167,6 +184,7 @@ final class PrompterModel: ObservableObject {
 
     private func startTimer() {
         timer?.invalidate()
+        timerSpeed = settings.wordsPerMinute
         timer = Timer.scheduledTimer(withTimeInterval: 60.0 / max(40, settings.wordsPerMinute), repeats: true) { [weak self] _ in
             guard let self else { return }
             if self.position >= self.spokenCount {
@@ -182,5 +200,6 @@ final class PrompterModel: ObservableObject {
         speech.stop()
         timer?.invalidate()
         timer = nil
+        timerSpeed = nil
     }
 }

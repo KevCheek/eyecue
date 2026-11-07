@@ -25,6 +25,14 @@ public struct ScriptDocument: Equatable {
         self.sections = sections
     }
 
+    /// Characters shown on the strip, headings included. Loaders check it against their limit, so a file
+    /// full of empty slides with long titles can't slip past a limit that only counts the notes.
+    public var displayedCharacters: Int {
+        sections.reduce(0) { total, section in
+            total + (section.heading?.utf16.count ?? 0) + section.paragraphs.reduce(0) { $0 + $1.utf16.count }
+        }
+    }
+
     /// True when there is nothing to read.
     public var isEmpty: Bool {
         sections.allSatisfy { section in

@@ -32,6 +32,24 @@
 	<string>Copyright 2026 Snowpine Code LLC. MIT License.</string>
 	<key>NSHighResolutionCapable</key>
 	<true/>
+	<!-- In-app updates (Sparkle). The feed is the newest release's appcast.xml on GitHub; every update
+	     must be signed with the private key matching SUPublicEDKey. -->
+	<key>SUFeedURL</key>
+	<string>https://github.com/snowpinecode/snowpine-cue/releases/latest/download/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>+WfnCpAsti7auFZ1vP11gLria8sh5h2drVS0sjYLVkI=</string>
+	<key>SUEnableInstallerLauncherService</key>
+	<true/>
+	<key>SUEnableDownloaderService</key>
+	<true/>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUAutomaticallyUpdate</key>
+	<false/>
+	<key>SUScheduledCheckInterval</key>
+	<integer>86400</integer>
+	<key>SUVerifyUpdateBeforeExtraction</key>
+	<true/>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Snowpine Cue listens while the prompter is running so the script can follow your voice. Audio is processed on this Mac and is never recorded or sent anywhere.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>

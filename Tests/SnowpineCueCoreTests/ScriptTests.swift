@@ -113,3 +113,15 @@ import Testing
     #expect(!text.contains("p{}"))
     #expect(!text.contains("never closed"))
 }
+
+@Test func emptySlidesWithLongTitlesCountTowardTheSizeLimit() {
+    let head = String(repeating: "x", count: 1_000)
+    var html = ""
+    for _ in 0..<50 { html += "<section data-notes=\"\" data-head=\"\(head)\"></section>" }
+    html += "<section data-notes=\"Hello there.\"></section>"
+    let doc = ScriptDocument.deckHTML(html, title: "deck")
+    #expect(doc?.sections.count == 51)
+    // The notes alone are tiny; the headings carry the bulk and must be counted.
+    let count = doc?.displayedCharacters ?? 0
+    #expect(count > 50_000)
+}

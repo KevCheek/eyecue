@@ -9,6 +9,10 @@ if let flag = CommandLine.arguments.firstIndex(of: "--smoke-test") {
     exit(code)
 }
 
+if CommandLine.arguments.contains("--window-check") {
+    exit(MainActor.assumeIsolated { WindowCheck.run() })
+}
+
 if let flag = CommandLine.arguments.firstIndex(of: "--render-frames") {
     let folder = CommandLine.arguments.indices.contains(flag + 1) ? CommandLine.arguments[flag + 1] : "frames"
     let code = MainActor.assumeIsolated { DocsRenderer.runFrames(outputDirectory: folder) }
