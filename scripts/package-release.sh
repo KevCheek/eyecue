@@ -1,9 +1,9 @@
 #!/bin/bash
 # Builds the zip people download: a universal app signed with SIGN_IDENTITY (ad-hoc without it), plus its SHA-256.
-#   VERSION=0.3.0 scripts/package-release.sh
+#   VERSION=0.3.1 scripts/package-release.sh
 set -euo pipefail
 cd "$(dirname "$0")/.."
-VERSION="${VERSION:-0.3.0}"
+VERSION="${VERSION:-0.3.1}"
 UNIVERSAL=1 VERSION="$VERSION" scripts/build-app.sh
 APP="build/Products.noindex/Snowpine Cue.app"
 lipo -archs "$APP/Contents/MacOS/SnowpineCue" | grep -q x86_64
